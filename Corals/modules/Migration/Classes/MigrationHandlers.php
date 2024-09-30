@@ -4,11 +4,32 @@ namespace Corals\Modules\Migration\Classes;
 
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 
 class MigrationHandlers
 {
+    /**
+     * @var
+     */
+    protected static $codeSetsTable;
+
+    /**
+     * @var
+     */
+    protected static $j9Table;
+    protected static $j1Table;
+    protected static $j3Table;
+    protected static $j8Table;
+
+    protected static $marketSegmentsParent;
+
+    /**
+     * @var
+     */
+    protected static $naStateCodeId;
+
     /**
      * @param $oldRecord
      * @param $oldColumn
@@ -300,6 +321,11 @@ class MigrationHandlers
         return 'n_a';
     }
 
+    public static function setToNA()
+    {
+        return 'NA';
+    }
+
     public static function setToUSACountry()
     {
         return 'US';
@@ -324,5 +350,230 @@ class MigrationHandlers
                 $cleanPhoneNumber = null;
             }
         });
+    }
+
+    /**
+     * @return string
+     */
+    public static function setToPhoneNumberPlaceholder()
+    {
+        return '000-000-0000';
+    }
+
+    /**
+     * @return string
+     */
+    public static function setToNoEmail()
+    {
+        return 'noemail@email.com';
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return string
+     */
+    public static function mapStatusAsActiveInactive($oldRecord, $oldColumn): string
+    {
+        $value = strtolower($oldRecord->{$oldColumn} ?? 'active');
+
+        return in_array($value, ['i']) ? 'Inactive' : 'Active';
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldForeignColumn
+     * @param $newRecord
+     * @param $new_column
+     * @param $newValue
+     * @param $functionArguments
+     * @return \Illuminate\Container\Container|mixed|object
+     */
+    public static function setToNaCodeId($oldRecord,
+                                         $oldForeignColumn,
+                                         $newRecord,
+                                         $new_column,
+                                         $newValue,
+                                         $functionArguments)
+    {
+        if ($newValue) {
+            return $newValue;
+        }
+
+        if (static::$naStateCodeId) {
+            return static::$naStateCodeId;
+        }
+
+        static::$naStateCodeId = DB::connection('mysql_migration_new')
+            ->table('code_sets')
+            ->where([
+                'parent_id' => 1,
+                'code' => 'NA'
+            ])->value('id');
+
+        return static::$naStateCodeId;
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return string
+     */
+    public static function mapCreditCardType($oldRecord, $oldColumn)
+    {
+        $value = $oldRecord->{$oldColumn};
+
+        //TODO::what to do in case of Null and ((AD,Other))
+        if (!$value) return $value;
+
+//        enum('visa', 'mastercard', 'amex', 'diners', 'discover', 'jcb', 'unionpay', 'electron', 'maestro', 'dankort', 'interpayment')
+        return match (strtolower($value)) {
+            'visa' => 'visa',
+            'discover' => 'discover',
+            'amex' => 'amex',
+            'mastercard' => 'mastercard',
+            'diners club' => 'diners',
+            default => 'other'
+        };
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return string
+     */
+    public static function mapPaymentMethod($oldRecord, $oldColumn)
+    {
+        $value = $oldRecord->{$oldColumn};
+
+        return $value ? 'CC' : 'Check';
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $newRecord
+     */
+    public static function preStoreCustomerRecord($oldRecord, &$newRecord)
+    {
+        if (!static::$codeSetsTable) {
+            static::$codeSetsTable = DB::table('code_sets')->select([
+                'code',
+                'id',
+                'parent_id'
+            ])->get();
+        }
+
+        if (!static::$j9Table) {
+            static::$j9Table = DB::connection('mysql_migration_old')
+                ->table('jcusf09')
+                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'TERMS'])
+                ->get();
+        }
+
+        if (!static::$j1Table) {
+            static::$j1Table = DB::connection('mysql_migration_old')
+                ->table('jcusf01_sites_dbf')
+                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'CCARDTYPE', 'LLCCBILL', 'STATEPRNT'])
+                ->get();
+        }
+
+        if (!static::$j3Table) {
+            static::$j3Table = DB::connection('mysql_migration_old')
+                ->table('jreff03')
+                ->select(['LATEDOL', 'COCODE'])
+                ->get();
+        }
+
+        $lateCharge = static::$j3Table->firstWhere('COCODE', $oldRecord->BLLCOCODE);
+
+
+        if ($lateCharge) {
+            $newRecord['late_charge'] = $lateCharge->LATEDOL;
+        }
+
+        if (!static::$j8Table) {
+            static::$j8Table = DB::connection('mysql_migration_old')
+                ->table('jcusf08')
+                ->select(['CUSTMAST', 'NTCODE'])
+                ->get();
+        }
+
+        $j9LowestCustNum = static::$j9Table->where('CUSTMAST', $oldRecord->BLLMAST)->sortBy('CUSTNUM')->first();
+        $j1LowestCustNum = static::$j1Table->where('CUSTMAST', $oldRecord->BLLMAST)->sortBy('CUSTNUM')->first();
+        $j8LowestCustNum = static::$j8Table->where('CUSTMAST', $oldRecord->BLLMAST)->sortBy('CUSTNUM')->first();
+
+        if ($j8LowestCustNum) {
+            $newRecord['customer_note_type'] = $j8LowestCustNum->NTCODE;
+        }
+
+        if (!static::$marketSegmentsParent) {
+            static::$marketSegmentsParent = static::$codeSetsTable->firstWhere('code', 'market_segments');
+        }
+
+        if ($j1LowestCustNum) {
+            $newRecord['payment_method'] = $j1LowestCustNum->CCARDTYPE <> '' && $j1LowestCustNum->LLCCBILL == 1 ? 'CC' : 'Check';
+            $newRecord['invoice_method_statement'] = $j1LowestCustNum->STATEPRNT = 'Y' ? 1 : 0;
+
+            $newRecord['card_type'] = $j1LowestCustNum->CCARDTYPE <> '' ? strtolower($j1LowestCustNum->CCARDTYPE) : null;
+
+            switch ($newRecord['card_type']) {
+                case 'MC':
+                    $newRecord['card_type'] = 'mastercard';
+                    break;
+                case 'DISC':
+                case 'discovery':
+                    $newRecord['card_type'] = 'discover';
+                    break;
+                case 'FALSE':
+                    $newRecord['card_type'] = 'visa';
+                    break;
+            }
+        }
+
+        if ($j9LowestCustNum) {
+            $newRecord['customer_market_segment_id'] = static::$codeSetsTable
+                    ->where('parent_id', static::$marketSegmentsParent->id)
+                    ->firstWhere('code', $j9LowestCustNum->ACCTTYPE)
+                    ->id ?? static::$marketSegmentsParent->id;
+
+            $terms = $j9LowestCustNum->TERMS;
+
+            if (!$terms) {
+                $newRecord['billing_terms'] = 'DOR';
+            } else {
+                $newRecord['billing_terms'] = Str::of($j9LowestCustNum->TERMS)
+                    ->startsWith('NET')
+                    ? $j9LowestCustNum->TERMS
+                    : 'DOR';
+            }
+
+            switch ($newRecord['billing_terms']) {
+                case 'NET':
+                case 'NETT':
+                case 'CHARGE':
+                case 'CC':
+                    $newRecord['billing_terms'] = 'NET30';
+                    break;
+                case 'NET20':
+                case 'NET 15':
+                case 'NET 5':
+                    $newRecord['billing_terms'] = 'NET15';
+                    break;
+                case 'NET 10':
+                    $newRecord['billing_terms'] = 'NET10';
+                    break;
+            }
+        }
+
+        $contact1FirstName = data_get($newRecord, 'contact_1_first_name');
+
+        if ($contact1FirstName && $contact1FirstName <> 'NA' && Str::contains($contact1FirstName, ' ')) {
+            $newRecord['contact_1_first_name'] = Str::of($contact1FirstName)->before(' ')->__toString();
+            $newRecord['contact_1_last_name'] = Str::of($contact1FirstName)->after(' ')->__toString();
+        }
+
+        if (empty($newRecord['customer_market_segment_id'])) {
+            $newRecord['customer_market_segment_id'] = static::$marketSegmentsParent->id;
+        }
     }
 }

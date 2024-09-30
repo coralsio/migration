@@ -68,6 +68,8 @@ class OldDatabaseSeeder
      */
     public function seedFromOldDB()
     {
+        DB::setDefaultConnection('mysql_migration_new');
+
         $this->migrationLog('OldDatabaseSeeder@seedFromOldDB::START');
 
         $oldTable = $this->configArray['old_table'];
@@ -84,7 +86,7 @@ class OldDatabaseSeeder
 
         //Handling orderBy column for using chunk
         if (!$orderByColumn) {
-            $oldColumnsNames = DB::connection('mysql_old')->getSchemaBuilder()->getColumnListing($oldTable);
+            $oldColumnsNames = DB::connection('mysql_migration_old')->getSchemaBuilder()->getColumnListing($oldTable);
             $orderByColumn = $oldColumnsNames[0];
         }
 
@@ -118,7 +120,7 @@ class OldDatabaseSeeder
 
             $this->migrationLog('connect to old db and start fetching records');
 
-            $queryBuilder = DB::connection('mysql_old')
+            $queryBuilder = DB::connection('mysql_migration_old')
                 ->table($oldTable)
                 ->orderBy($orderByColumn, $orderBy_direction);
 
@@ -188,28 +190,6 @@ class OldDatabaseSeeder
                             $oldTable);
 
                         //Handling many-many relations
-                        foreach ($mapping['relation_fields'] ?? [] as $oldColumn => $config) {
-                            if ($oldRecord->{$oldColumn}) {
-
-
-                                $foreignColumns = $mapping['foreign_columns'] ?? $config['foreign_columns'];
-
-
-                                $this->getReferenceTables($foreignColumns);
-
-                                if ($foreignColumnConfig = $foreignColumns[$oldColumn] ?? '') {
-                                    $referenceTableName = $foreignColumnConfig['table'];
-
-
-                                    $foreignId = $this->getForeignValue($oldRecord->{$oldColumn}, $referenceTableName,
-                                        'id');
-
-                                    if ($foreignId) {
-                                        $this->handleManyToManyRelation($newObjectId, $foreignId, $config);
-                                    }
-                                }
-                            }
-                        }
 
                         $postCreateObject = $mapping['post_create_object'] ?? [];
 
