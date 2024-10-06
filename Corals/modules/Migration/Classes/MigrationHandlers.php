@@ -22,8 +22,11 @@ class MigrationHandlers
     protected static $j1Table;
     protected static $j3Table;
     protected static $j8Table;
+    protected static $j0r2Table;
 
     protected static $marketSegmentsParent;
+    protected static $salesCreditParent;
+    protected static $surchargeParent;
 
     /**
      * @var
@@ -517,14 +520,14 @@ class MigrationHandlers
             $newRecord['card_type'] = $j1LowestCustNum->CCARDTYPE <> '' ? strtolower($j1LowestCustNum->CCARDTYPE) : null;
 
             switch ($newRecord['card_type']) {
-                case 'MC':
+                case 'mc':
                     $newRecord['card_type'] = 'mastercard';
                     break;
-                case 'DISC':
+                case 'disc':
                 case 'discovery':
                     $newRecord['card_type'] = 'discover';
                     break;
-                case 'FALSE':
+                case 'false':
                     $newRecord['card_type'] = 'visa';
                     break;
             }
@@ -575,5 +578,186 @@ class MigrationHandlers
         if (empty($newRecord['customer_market_segment_id'])) {
             $newRecord['customer_market_segment_id'] = static::$marketSegmentsParent->id;
         }
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $newRecord
+     */
+    public static function preStoreSiteRecord($oldRecord, &$newRecord)
+    {
+        $contact2FirstName = data_get($newRecord, 'contact_2_first_name');
+
+        if ($contact2FirstName && $contact2FirstName <> 'NA' && Str::contains($contact2FirstName, ' ')) {
+            $newRecord['contact_2_first_name'] = Str::of($contact2FirstName)->before(' ')->__toString();
+            $newRecord['contact_2_last_name'] = Str::of($contact2FirstName)->after(' ')->__toString();
+        }
+
+        if (!static::$codeSetsTable) {
+            static::$codeSetsTable = DB::table('code_sets')->select([
+                'code',
+                'id',
+                'parent_id'
+            ])->get();
+        }
+
+        if (!static::$j9Table) {
+            static::$j9Table = DB::connection('mysql_migration_old')
+                ->table('jcusf09')
+                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'TERMS'])
+                ->get();
+        }
+
+        $j9LowestCustNum = static::$j9Table->where('CUSTMAST', $oldRecord->CUSTMAST)->sortBy('CUSTNUM')->first();
+
+//        if (!static::$j0r2Table) {
+//            static::$j0r2Table = DB::table('jref0r2')->select([
+//                'REFCODE',
+//                'REFDESC',
+//                'REFMEMO'
+//            ])->get();
+//        }
+
+        //  TODO::divisioncode is missing
+//        $refcode1143 = static::$j0r2Table->where('REFCODE', '1143')->where('divisioncode', $oldRecord->COCODE);
+
+        if (!static::$marketSegmentsParent) {
+            static::$marketSegmentsParent = static::$codeSetsTable->firstWhere('code', 'market_segments');
+        }
+
+        if (!static::$salesCreditParent) {
+            static::$salesCreditParent = static::$codeSetsTable->firstWhere('code', 'sales_credits');
+        }
+
+        if (!static::$surchargeParent) {
+            static::$surchargeParent = static::$codeSetsTable->firstWhere('code', 'surcharges');
+        }
+
+        $newRecord['market_segment_id'] = static::$codeSetsTable
+                ->where('parent_id', static::$marketSegmentsParent->id)
+                ->firstWhere('code', $oldRecord->ACCTTYPE)
+                ->id ?? static::$marketSegmentsParent->id;
+
+        $newRecord['billing_term_id'] = static::$codeSetsTable
+                ->where('parent_id', static::$salesCreditParent->id)
+                ->firstWhere('code', $oldRecord->SALECREDIT)
+                ->id ?? static::$salesCreditParent->id;
+
+        //TODO:: SCCODE from 05 table
+//        $newRecord['default_surcharge_id'] = static::$codeSetsTable
+//                ->where('parent_id', static::$surchargeParent->id)
+//                ->firstWhere('code', $oldRecord->SCCODE)
+//                ->id ?? static::$surchargeParent->id;
+
+
+        $newRecord['card_type'] = $oldRecord->CCARDTYPE <> '' ? strtolower($oldRecord->CCARDTYPE) : null;
+
+        switch ($newRecord['card_type']) {
+            case 'mc':
+                $newRecord['card_type'] = 'mastercard';
+                break;
+            case 'ame':
+                $newRecord['card_type'] = 'amex';
+                break;
+            case 'disc':
+            case 'discovery':
+                $newRecord['card_type'] = 'discover';
+                break;
+            case 'false':
+                $newRecord['card_type'] = 'visa';
+                break;
+        }
+
+        if ($j9LowestCustNum) {
+            $terms = $j9LowestCustNum->TERMS;
+
+            if (!$terms) {
+                $newRecord['billing_terms'] = 'DOR';
+            } else {
+                $newRecord['billing_terms'] = Str::of($j9LowestCustNum->TERMS)
+                    ->startsWith('NET')
+                    ? $j9LowestCustNum->TERMS
+                    : 'DOR';
+            }
+
+            switch ($newRecord['billing_terms']) {
+                case 'NET':
+                case 'NETT':
+                case 'CHARGE':
+                case 'CC':
+                    $newRecord['billing_terms'] = 'NET30';
+                    break;
+                case 'NET20':
+                case 'NET 15':
+                case 'NET 5':
+                    $newRecord['billing_terms'] = 'NET15';
+                    break;
+                case 'NET 10':
+                case '2':
+                    $newRecord['billing_terms'] = 'NET10';
+                    break;
+            }
+
+            if (!in_array($newRecord['billing_terms'], ['DOR', 'NET10', 'NET15', 'NET30', 'NET45', 'NET60'])) {
+                $newRecord['billing_terms'] = 'NET30';
+            }
+        }
+
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return array|string|string[]
+     */
+    public static function cleanEmail($oldRecord, $oldColumn)
+    {
+        $email = $oldRecord->{$oldColumn};
+
+        $trimmedEmail = trim($email);
+
+        return rtrim(ltrim(str_replace(';', ',', $trimmedEmail)));
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return string
+     */
+    public static function trim($oldRecord, $oldColumn)
+    {
+        return rtrim(ltrim($oldRecord->{$oldColumn}));
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return string
+     */
+    public static function stripTags($oldRecord, $oldColumn)
+    {
+        return strip_tags($oldRecord->{$oldColumn});
+    }
+
+    /**
+     * @param $oldRecord
+     * @param $oldColumn
+     * @return string
+     */
+    public static function trimAndStripTags($oldRecord, $oldColumn)
+    {
+        return rtrim(ltrim(
+            strip_tags(
+                $oldRecord->{$oldColumn}
+            )
+        ));
+    }
+
+    /**
+     * @return string
+     */
+    public static function setToZero()
+    {
+        return 0;
     }
 }
