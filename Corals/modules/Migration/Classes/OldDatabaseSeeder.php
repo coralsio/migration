@@ -456,6 +456,7 @@ class OldDatabaseSeeder
                         $newRecord["$newColumn"] = $newValue;
                     }
                 }
+
             }
         }
     }

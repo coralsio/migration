@@ -19,6 +19,7 @@ class MigrationHandlers
      * @var
      */
     protected static $j9Table;
+    protected static $j5Table;
     protected static $j1Table;
     protected static $j3Table;
     protected static $j8Table;
@@ -608,6 +609,13 @@ class MigrationHandlers
                 ->get();
         }
 
+        if (!static::$j5Table) {
+            static::$j5Table = DB::connection('mysql_migration_old')
+                ->table('jcusf05')
+                ->select(['SCPAMT', 'SCFAMT', 'CUSTNUM', 'SCCODE'])
+                ->get();
+        }
+
         $j9LowestCustNum = static::$j9Table->where('CUSTMAST', $oldRecord->CUSTMAST)->sortBy('CUSTNUM')->first();
 
 //        if (!static::$j0r2Table) {
@@ -643,11 +651,21 @@ class MigrationHandlers
                 ->firstWhere('code', $oldRecord->SALECREDIT)
                 ->id ?? static::$salesCreditParent->id;
 
-        //TODO:: SCCODE from 05 table
-//        $newRecord['default_surcharge_id'] = static::$codeSetsTable
-//                ->where('parent_id', static::$surchargeParent->id)
-//                ->firstWhere('code', $oldRecord->SCCODE)
-//                ->id ?? static::$surchargeParent->id;
+        $j5LowestCustNum = null;
+
+        if ($j9LowestCustNum) {
+            $j5LowestCustNum = static::$j5Table->where('CUSTNUM', $j9LowestCustNum->CUSTNUM)->sortBy('CUSTNUM')->first();
+        }
+
+        if ($j5LowestCustNum) {
+            $newRecord['default_surcharge_rate'] = $j5LowestCustNum->SCPAMT;
+            $newRecord['default_surcharge_id'] = static::$codeSetsTable
+                    ->where('code', $j5LowestCustNum->SCCODE)
+                    ->where('parent_id', static::$surchargeParent->id)
+                    ->sortByDesc('id')
+                    ->first()
+                    ->id ?? static::$surchargeParent->id;
+        }
 
 
         $newRecord['card_type'] = $oldRecord->CCARDTYPE <> '' ? strtolower($oldRecord->CCARDTYPE) : null;
@@ -707,14 +725,15 @@ class MigrationHandlers
 
     /**
      * @param $oldRecord
-     * @param $oldColumn
-     * @return array|string|string[]
+     * @param $oldForeignColumn
+     * @param $newRecord
+     * @param $new_column
+     * @param $newValue
+     * @return string
      */
-    public static function cleanEmail($oldRecord, $oldColumn)
+    public static function cleanEmailFromRelation($oldRecord, $oldForeignColumn, $newRecord, $new_column, $newValue)
     {
-        $email = $oldRecord->{$oldColumn};
-
-        $trimmedEmail = trim($email);
+        $trimmedEmail = trim($newValue);
 
         return rtrim(ltrim(str_replace(';', ',', $trimmedEmail)));
     }

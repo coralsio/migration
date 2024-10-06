@@ -117,14 +117,6 @@ return [
                         'SUPER' => 'contact_2_first_name',
                         'SITEPHONE' => 'contact_2_phone',
                         'SITEFAX' => 'contact_3_phone',
-                        'EMAIL' => [
-                            'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::cleanEmail',
-                            'function_args' => ['column' => 'contact_1_email'],
-                        ],
-                        'EMAIL2' => [
-                            'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::cleanEmail',
-                            'function_args' => ['column' => 'contact_2_email'],
-                        ],
                         'SITEADDR' => [
                             'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::trim',
                             'function_args' => ['column' => 'address_1']
@@ -181,7 +173,10 @@ return [
                                 'contact_1_first_name' => 'contact_1_first_name',
                                 'contact_1_last_name' => 'contact_1_last_name',
                                 'contact_1_phone' => 'contact_1_phone',
-                                'contact_1_email' => 'contact_1_email'
+                                'contact_1_email' => [
+                                    'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::cleanEmailFromRelation',
+                                    'function_args' => ['column' => 'contact_1_email']
+                                ]
                             ]
                         ],
                         'SITESTATE' => [
@@ -235,10 +230,15 @@ return [
                                 ]
                             ]
 
+                        ],
+                        'new_record_validations' => [
+                            'rules' => [
+                                'customer_id' => 'required'
+                            ],
+                            'actions' => [
+                                'customer_id' => ['status' => 'fail']
+                            ]
                         ]
-                    ],
-                    'unique_columns' => [
-                        'id'
                     ],
                     'pre_create_object' => [
                         '\Corals\Modules\Migration\Classes\MigrationHandlers::preStoreSiteRecord'
