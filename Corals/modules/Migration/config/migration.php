@@ -113,7 +113,10 @@ return [
 //                            'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::mapStatusAsActiveInactive',
 //                            'function_args' => ['column' => 'status'],
 //                        ],
-                        'SITENAME' => 'name',
+                        'SITENAME' => [
+                            'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::trim',
+                            'function_args' => ['column' => 'name']
+                        ],
                         'SUPER' => 'contact_2_first_name',
                         'SITEPHONE' => 'contact_2_phone',
                         'SITEFAX' => 'contact_3_phone',
@@ -211,9 +214,13 @@ return [
                                 'SUPER' => 'required',
                                 'MAPLAT' => 'required',
                                 'MAPLONG' => 'required',
+                                'SITENAME' => 'required'
                             ],
                             'actions' => [
                                 'CUSTMAST' => [
+                                    'status' => 'fail'
+                                ],
+                                'SITENAME' => [
                                     'status' => 'fail'
                                 ],
                                 'SUPER' => [
