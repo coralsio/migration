@@ -91,7 +91,9 @@ return [
                     'appended_columns' => [
                         'invoice_settings' => 'Standard',
                         'default_surcharge_rate' => 0,
-                        'customer_bill_through_date_selection' => 'Earliest'
+                        'customer_bill_through_date_selection' => 'Earliest',
+                        'default_bill_type' => '28 Day Fixed',
+                        'scheduling_settings' => 'Arrears'
                     ]
                 ],
             ]
@@ -105,8 +107,10 @@ return [
                     'old_table' => 'jcusf01_sites_dbf',
                     'new_table' => 'sites',
                     'appended_columns' => [
-                        'status' => 'Active',
-                        'tax_manual_override' => 1
+                        'tax_manual_override' => 1,
+                        'site_bill_through_date_selection' => 'Earliest',
+                        'default_bill_type' => '28 Day Fixed',
+                        'scheduling_settings' => 'Arrears'
                     ],
                     'mapping_array' => [
 //                        'ACCTSTATUS' => [

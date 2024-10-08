@@ -70,7 +70,7 @@ class MigrationHandlers
 
     public static function mapToBoolean($oldRecord, $oldColumn)
     {
-        return in_array($oldRecord->{$oldColumn}, ['Y', 'y', 'Yes', 'yes', 'true']);
+        return in_array($oldRecord->{$oldColumn}, ['Y', 'y', 'Yes', 'yes', 'true', 'TURE']);
     }
 
 
@@ -470,7 +470,7 @@ class MigrationHandlers
         if (!static::$j9Table) {
             static::$j9Table = DB::connection('mysql_migration_old')
                 ->table('jcusf09')
-                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'TERMS'])
+                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'TERMS', 'EMAILLST'])
                 ->get();
         }
 
@@ -542,12 +542,16 @@ class MigrationHandlers
 
             $terms = $j9LowestCustNum->TERMS;
 
+            $newRecord['invoice_method_print'] = static::mapToBoolean($j9LowestCustNum, 'EMAILLST');
+            $newRecord['invoice_method_email'] = static::mapToBoolean($j9LowestCustNum, 'EMAILLST');
+            $newRecord['communication_method'] = static::mapToBoolean($j9LowestCustNum, 'EMAILLST');
+
             if (!$terms) {
                 $newRecord['billing_terms'] = 'DOR';
             } else {
-                $newRecord['billing_terms'] = Str::of($j9LowestCustNum->TERMS)
+                $newRecord['billing_terms'] = Str::of($terms)
                     ->startsWith('NET')
-                    ? $j9LowestCustNum->TERMS
+                    ? $terms
                     : 'DOR';
             }
 
@@ -579,6 +583,18 @@ class MigrationHandlers
         if (empty($newRecord['customer_market_segment_id'])) {
             $newRecord['customer_market_segment_id'] = static::$marketSegmentsParent->id;
         }
+
+        if (empty($newRecord['invoice_method_print'])) {
+            $newRecord['invoice_method_print'] = false;
+        }
+
+        if (empty($newRecord['invoice_method_email'])) {
+            $newRecord['invoice_method_email'] = false;
+        }
+
+        if (empty($newRecord['communication_method'])) {
+            $newRecord['communication_method'] = false;
+        }
     }
 
     /**
@@ -605,7 +621,7 @@ class MigrationHandlers
         if (!static::$j9Table) {
             static::$j9Table = DB::connection('mysql_migration_old')
                 ->table('jcusf09')
-                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'TERMS'])
+                ->select(['ACCTTYPE', 'CUSTNUM', 'CUSTMAST', 'TERMS', 'EMAILLST'])
                 ->get();
         }
 
@@ -655,6 +671,12 @@ class MigrationHandlers
 
         if ($j9LowestCustNum) {
             $j5LowestCustNum = static::$j5Table->where('CUSTNUM', $j9LowestCustNum->CUSTNUM)->sortBy('CUSTNUM')->first();
+
+            $newRecord['status'] = static::mapStatusAsActiveInactive($j5LowestCustNum, 'ACCTSTATUS');
+
+
+            $newRecord['invoice_method_print'] = static::mapToBoolean($j9LowestCustNum, 'EMAILLST');
+            $newRecord['invoice_method_email'] = static::mapToBoolean($j9LowestCustNum, 'EMAILLST');
         }
 
         if ($j5LowestCustNum) {
@@ -721,6 +743,18 @@ class MigrationHandlers
             }
         }
 
+
+        if (empty($newRecord['invoice_method_print'])) {
+            $newRecord['invoice_method_print'] = false;
+        }
+
+        if (empty($newRecord['invoice_method_email'])) {
+            $newRecord['invoice_method_email'] = false;
+        }
+
+        if (empty($newRecord['status'])) {
+            $newRecord['status'] = 'Active';
+        }
     }
 
     /**
