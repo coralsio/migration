@@ -124,6 +124,7 @@ return [
                         'SUPER' => 'contact_2_first_name',
                         'SITEPHONE' => 'contact_2_phone',
                         'SITEFAX' => 'contact_3_phone',
+                        'CUSTNUM' => 'id',
                         'SITEADDR' => [
                             'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::trim',
                             'function_args' => ['column' => 'address_1']
