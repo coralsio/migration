@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'na_code_id' => 237,
     'seeder' => [
         'customer' => [
             'old_table' => 'jcusf07_customers_dbf',
@@ -108,7 +107,6 @@ return [
                     'new_table' => 'sites',
                     'appended_columns' => [
                         'tax_manual_override' => 1,
-                        'site_bill_through_date_selection' => 'Earliest',
                         'default_bill_type' => '28 Day Fixed',
                         'scheduling_settings' => 'Arrears'
                     ],
@@ -223,10 +221,13 @@ return [
                             ],
                             'actions' => [
                                 'CUSTMAST' => [
-                                    'status' => 'fail'
+                                    'status' => 'fail',
+                                    'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setNACustomer'
+
                                 ],
                                 'SITENAME' => [
-                                    'status' => 'fail'
+                                    'status' => 'fail',
+                                    'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToNA'
                                 ],
                                 'SUPER' => [
                                     'status' => 'fail',

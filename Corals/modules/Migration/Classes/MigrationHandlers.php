@@ -813,4 +813,12 @@ class MigrationHandlers
     {
         return 0;
     }
+
+    /**
+     * @return mixed
+     */
+    public static function setNACustomer()
+    {
+        return 'NA';
+    }
 }
