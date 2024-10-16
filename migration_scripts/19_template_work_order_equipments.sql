@@ -1,0 +1,36 @@
+truncate table pf_new.template_work_order_equipments;
+
+INSERT INTO pf_new.template_work_order_equipments (id,
+                                                   work_order_id,
+                                                   site_id,
+                                                   template_work_order_id,
+                                                   type_id,
+                                                   description,
+                                                   hose_feet,
+                                                   size,
+                                                   depth,
+                                                   interval_of_service,
+                                                   cover,
+                                                   `condition`,
+                                                   notes,
+                                                   latitude,
+                                                   longitude,
+                                                   created_at)
+SELECT pe.id,
+       0      AS work_order_id,
+       pe.site_id,
+       pft.id AS template_work_order_id,
+       pe.type_id,
+       pe.description,
+       pe.hose_feet,
+       pe.size,
+       pe.depth,
+       pe.interval_of_service,
+       pe.cover,
+       pe.condition,
+       pe.notes,
+       pe.latitude,
+       pe.longitude,
+       pe.created_at
+FROM pf_new.equipments pe
+         INNER JOIN pf_new.template_work_orders pft ON pft.site_id = pe.site_id;
