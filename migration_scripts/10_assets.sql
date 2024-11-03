@@ -14,7 +14,7 @@
     truncate table pf_new.assets;
 
     INSERT INTO pf_new.assets (ID,
-        --  asset_type_id,
+          asset_type_id,
                                serial_no,
                                work_order_id,
                                template_work_order_id,
@@ -54,7 +54,7 @@
                                delivery_date,
                                sales_rep_id)
     SELECT ROW_NUMBER()                                                                                                      OVER(ORDER BY j1.serial ASC) AS ID,
-           -- COALESCE((SELECT id FROM pf_new.code_sets WHERE parent_id = 103 AND code = descrip LIMIT 1), NULL) AS asset_type_id,
+           COALESCE((SELECT id FROM pf_new.code_sets WHERE parent_id = 103 AND code = j1.desc LIMIT 1), NULL) AS asset_type_id,
            j1.serial AS serial_no,
            CAST(NULL AS SIGNED)                                                                                           AS work_order_id,
            COALESCE((SELECT id FROM pf_new.template_work_orders pft WHERE j1.custnum = pft.site_id LIMIT

@@ -36,4 +36,5 @@ FROM pf_new.assets pfa
          INNER JOIN pf_new.asset_template_services pfats
                     ON pfa.id = pfats.asset_id
          INNER JOIN pf_new.template_work_order_services ptwo
-                    ON ptwo.id = pfats.template_work_order_service_id;
+                    ON ptwo.id = pfats.template_work_order_service_id
+group by pfa.id
