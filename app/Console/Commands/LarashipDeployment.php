@@ -55,6 +55,7 @@ class LarashipDeployment extends Command
         });
 
         $sortedModules = [
+            'corals-migration'
         ];
 
         $this->line('Update or install required modules');

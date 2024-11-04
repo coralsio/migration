@@ -16,6 +16,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        Schema::dropIfExists('data_migrations');
+
         Schema::create('data_migrations', function (Blueprint $table) {
             $table->increments('id');
             $table->string('config_path', 70)->index();

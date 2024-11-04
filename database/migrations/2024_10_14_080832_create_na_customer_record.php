@@ -14,6 +14,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        DB::table('customers')->where('number', 'NA')->delete();
+
         DB::table('customers')->insert([
             'number' => 'NA',
             'customer_number' => 'NA',
@@ -24,6 +26,7 @@ return new class extends Migration {
             'contact_1_email' => 'noemail@email.com',
             'default_bill_type' => '28 Day Fixed',
             'tax_manual_override' => 1,
+            'customer_market_segment_id' => 166,
 //            'site_bill_through_date_selection' => 'Earliest',
             'scheduling_settings' => 'Arrears'
         ]);
