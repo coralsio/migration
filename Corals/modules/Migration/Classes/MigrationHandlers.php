@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 
 class MigrationHandlers
 {
+    private static $seqNumber = 1;
     /**
      * @var
      */
@@ -33,6 +34,11 @@ class MigrationHandlers
      * @var
      */
     protected static $naStateCodeId;
+
+    /**
+     * @var
+     */
+    protected static $naCustomerId;
 
     /**
      * @param $oldRecord
@@ -536,9 +542,9 @@ class MigrationHandlers
 
         if ($j9LowestCustNum) {
             $newRecord['customer_market_segment_id'] = static::$codeSetsTable
-                ->where('parent_id', static::$marketSegmentsParent->id)
-                ->firstWhere('code', $j9LowestCustNum->ACCTTYPE)
-                ->id ?? static::$marketSegmentsParent->id;
+                    ->where('parent_id', static::$marketSegmentsParent->id)
+                    ->firstWhere('code', $j9LowestCustNum->ACCTTYPE)
+                    ->id ?? static::$marketSegmentsParent->id;
 
             $terms = $j9LowestCustNum->TERMS;
 
@@ -658,14 +664,14 @@ class MigrationHandlers
         }
 
         $newRecord['market_segment_id'] = static::$codeSetsTable
-            ->where('parent_id', static::$marketSegmentsParent->id)
-            ->firstWhere('code', $oldRecord->ACCTTYPE)
-            ->id ?? static::$marketSegmentsParent->id;
+                ->where('parent_id', static::$marketSegmentsParent->id)
+                ->firstWhere('code', $oldRecord->ACCTTYPE)
+                ->id ?? static::$marketSegmentsParent->id;
 
         $newRecord['billing_term_id'] = static::$codeSetsTable
-            ->where('parent_id', static::$salesCreditParent->id)
-            ->firstWhere('code', $oldRecord->SALECREDIT)
-            ->id ?? static::$salesCreditParent->id;
+                ->where('parent_id', static::$salesCreditParent->id)
+                ->firstWhere('code', $oldRecord->SALECREDIT)
+                ->id ?? static::$salesCreditParent->id;
 
         $j5LowestCustNum = null;
 
@@ -682,11 +688,11 @@ class MigrationHandlers
         if ($j5LowestCustNum) {
             $newRecord['default_surcharge_rate'] = $j5LowestCustNum->SCPAMT;
             $newRecord['default_surcharge_id'] = static::$codeSetsTable
-                ->where('code', $j5LowestCustNum->SCCODE)
-                ->where('parent_id', static::$surchargeParent->id)
-                ->sortByDesc('id')
-                ->first()
-                ->id ?? static::$surchargeParent->id;
+                    ->where('code', $j5LowestCustNum->SCCODE)
+                    ->where('parent_id', static::$surchargeParent->id)
+                    ->sortByDesc('id')
+                    ->first()
+                    ->id ?? static::$surchargeParent->id;
         }
 
 
@@ -828,5 +834,31 @@ class MigrationHandlers
     public static function setNACustomer()
     {
         return 'NA';
+    }
+
+    /**
+     * @return string
+     */
+    public static function setSeqNumber()
+    {
+        return sprintf("na_%s", static::$seqNumber++);
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function setToNaCustomerId()
+    {
+        if (static::$naCustomerId) {
+            return static::$naCustomerId;
+        }
+
+        static::$naCustomerId = DB::connection('mysql_migration_new')
+            ->table('customers')
+            ->where([
+                'number' => 'NA'
+            ])->value('id');
+
+        return static::$naCustomerId;
     }
 }

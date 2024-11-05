@@ -15,6 +15,9 @@ return new class extends Migration {
     public function up(): void
     {
         DB::table('customers')->where('number', 'NA')->delete();
+        DB::table('code_sets')->where('code', 'NA')
+            ->where('parent_id', 1)
+            ->delete();
 
         DB::table('customers')->insert([
             'number' => 'NA',
@@ -30,6 +33,14 @@ return new class extends Migration {
 //            'site_bill_through_date_selection' => 'Earliest',
             'scheduling_settings' => 'Arrears'
         ]);
+
+        DB::table('code_sets')->insert([
+            'code' => 'NA',
+            'value' => 'NA',
+            'description' => 'NA',
+            'parent_id' => 1,
+        ]);
+
     }
 
     /**
@@ -38,5 +49,10 @@ return new class extends Migration {
     public function down(): void
     {
         DB::table('customers')->where('number', 'NA')->delete();
+
+        DB::table('code_sets')->where('code', 'NA')
+            ->where('parent_id', 1)
+            ->delete();
+
     }
 };

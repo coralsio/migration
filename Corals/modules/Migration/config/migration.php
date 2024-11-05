@@ -61,7 +61,10 @@ return [
                                 'BLLNAME' => 'required'
                             ],
                             'actions' => [
-                                'BLLMAST' => ['status' => 'fail'],
+                                'BLLMAST' => [
+                                    'status' => 'fail',
+                                    'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setSeqNumber'
+                                ],
                                 'BLLNAME' => [
                                     'status' => 'fail',
                                     'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToNA'
@@ -196,10 +199,7 @@ return [
                             'table' => 'code_sets',
                             'used_field' => 'code',
                             'mapping_array' => [
-                                'id' => [
-                                    'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToNaCodeId',
-                                    'function_args' => ['column' => 'state_id'],
-                                ]
+                                'id' => 'state_id'
                             ]
                         ],
 //                        'ACCTTYPE' => [
@@ -249,14 +249,26 @@ return [
                                     'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToZero'
                                 ]
                             ]
-
                         ],
                         'new_record_validations' => [
                             'rules' => [
-                                'customer_id' => 'required'
+                                'customer_id' => 'required',
+                                'contact_1_first_name' => 'required',
+                                'state_id' => 'required'
                             ],
                             'actions' => [
-                                'customer_id' => ['status' => 'fail']
+                                'customer_id' => [
+                                    'status' => 'fail',
+                                    'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToNaCustomerId'
+                                ],
+                                'contact_1_first_name' => [
+                                    'status' => 'fail',
+                                    'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToNA'
+                                ],
+                                'state_id' => [
+                                    'status' => 'fail',
+                                    'on_fail' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToNaCodeId'
+                                ],
                             ]
                         ]
                     ],

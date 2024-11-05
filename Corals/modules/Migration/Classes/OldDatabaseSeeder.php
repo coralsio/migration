@@ -203,6 +203,7 @@ class OldDatabaseSeeder
                                 $handlerFunction($oldRecord, $newRecord, $newObjectId, $handlerArguments);
                             }
                         }
+
                         //insert into data migrations table
                         $this->insertIntoDataMigrationTable($oldRecord, $oldTableIdentifierColumn, $oldTable,
                             'success');
