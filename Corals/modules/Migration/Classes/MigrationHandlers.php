@@ -536,9 +536,9 @@ class MigrationHandlers
 
         if ($j9LowestCustNum) {
             $newRecord['customer_market_segment_id'] = static::$codeSetsTable
-                    ->where('parent_id', static::$marketSegmentsParent->id)
-                    ->firstWhere('code', $j9LowestCustNum->ACCTTYPE)
-                    ->id ?? static::$marketSegmentsParent->id;
+                ->where('parent_id', static::$marketSegmentsParent->id)
+                ->firstWhere('code', $j9LowestCustNum->ACCTTYPE)
+                ->id ?? static::$marketSegmentsParent->id;
 
             $terms = $j9LowestCustNum->TERMS;
 
@@ -658,14 +658,14 @@ class MigrationHandlers
         }
 
         $newRecord['market_segment_id'] = static::$codeSetsTable
-                ->where('parent_id', static::$marketSegmentsParent->id)
-                ->firstWhere('code', $oldRecord->ACCTTYPE)
-                ->id ?? static::$marketSegmentsParent->id;
+            ->where('parent_id', static::$marketSegmentsParent->id)
+            ->firstWhere('code', $oldRecord->ACCTTYPE)
+            ->id ?? static::$marketSegmentsParent->id;
 
         $newRecord['billing_term_id'] = static::$codeSetsTable
-                ->where('parent_id', static::$salesCreditParent->id)
-                ->firstWhere('code', $oldRecord->SALECREDIT)
-                ->id ?? static::$salesCreditParent->id;
+            ->where('parent_id', static::$salesCreditParent->id)
+            ->firstWhere('code', $oldRecord->SALECREDIT)
+            ->id ?? static::$salesCreditParent->id;
 
         $j5LowestCustNum = null;
 
@@ -682,11 +682,11 @@ class MigrationHandlers
         if ($j5LowestCustNum) {
             $newRecord['default_surcharge_rate'] = $j5LowestCustNum->SCPAMT;
             $newRecord['default_surcharge_id'] = static::$codeSetsTable
-                    ->where('code', $j5LowestCustNum->SCCODE)
-                    ->where('parent_id', static::$surchargeParent->id)
-                    ->sortByDesc('id')
-                    ->first()
-                    ->id ?? static::$surchargeParent->id;
+                ->where('code', $j5LowestCustNum->SCCODE)
+                ->where('parent_id', static::$surchargeParent->id)
+                ->sortByDesc('id')
+                ->first()
+                ->id ?? static::$surchargeParent->id;
         }
 
 
@@ -812,6 +812,14 @@ class MigrationHandlers
     public static function setToZero()
     {
         return 0;
+    }
+
+    /**
+     * @return string
+     */
+    public static function setToZeroHandler($oldRecord, $oldColumn)
+    {
+        return $oldRecord->{$oldColumn} ?? 0;
     }
 
     /**

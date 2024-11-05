@@ -108,7 +108,8 @@ return [
                     'appended_columns' => [
                         'tax_manual_override' => 1,
                         'default_bill_type' => '28 Day Fixed',
-                        'scheduling_settings' => 'Arrears'
+                        'scheduling_settings' => 'Arrears',
+                        'division_id' => 9,
                     ],
                     'mapping_array' => [
 //                        'ACCTSTATUS' => [
@@ -166,8 +167,14 @@ return [
                             'function_args' => ['column' => 'invoice_method_statement'],
                         ],
                         'PO_NUM' => 'po_number',
-                        'TAXPCNT' => 'tax_rate_1',
-                        'TAXPCNT2' => 'tax_rate_2'
+                        'TAXPCNT' => [
+                            'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToZeroHandler',
+                            'function_args' => ['column' => 'tax_rate_1'],
+                        ],
+                        'TAXPCNT2' => [
+                            'handler_function' => '\Corals\Modules\Migration\Classes\MigrationHandlers::setToZeroHandler',
+                            'function_args' => ['column' => 'tax_rate_2'],
+                        ]
 
                     ],
                     'foreign_columns' => [
@@ -202,13 +209,13 @@ return [
 //                                'id' => 'market_segment_id'
 //                            ]
 //                        ],
-                        'COCODE' => [
-                            'table' => 'divisions',
-                            'used_field' => 'division_code',
-                            'mapping_array' => [
-                                'id' => 'division_id'
-                            ]
-                        ]
+//                        'COCODE' => [
+//                            'table' => 'divisions',
+//                            'used_field' => 'division_code',
+//                            'mapping_array' => [
+//                                'id' => 'division_id'
+//                            ]
+//                        ]
                     ],
                     'validations' => [
                         'old_record_validations' => [

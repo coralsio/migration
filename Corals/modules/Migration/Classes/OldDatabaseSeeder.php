@@ -209,7 +209,7 @@ class OldDatabaseSeeder
 
                         $this->migrationLog("_________________________________________________________Successfully Handled [$key] Records: $handledRecords");
                     } catch (\Exception $exception) {
-//                        report($exception);
+                        report($exception);
                         $this->migrationLog($exception->getMessage(), false, 'error');
 
                         $this->insertIntoDataMigrationTable($oldRecord, $oldTableIdentifierColumn, $oldTable,
@@ -274,7 +274,7 @@ class OldDatabaseSeeder
                             $oldTableIdentifierColumn, $oldTable);
                     }
                 } catch (\Exception $exception) {
-//                    report($exception);
+                    report($exception);
                     $this->migrationLog($exception->getMessage(), false, 'error');
                     $this->insertIntoDataMigrationTable($oldRecord, $oldTableIdentifierColumn, $oldTable,
                         'Related Table::' . $relatedTableKey . '::' . $exception->getMessage(), false);
@@ -545,7 +545,7 @@ class OldDatabaseSeeder
                 $this->bulkDBLogInsert = [];
             }
         } catch (\Exception $exception) {
-//            report($exception);
+            report($exception);
             $this->migrationLog($exception->getMessage(), false, 'error');
         }
     }
