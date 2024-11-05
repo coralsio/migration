@@ -650,7 +650,7 @@ class MigrationHandlers
         }
 
         if (!static::$salesCreditParent) {
-            static::$salesCreditParent = static::$codeSetsTable->firstWhere('code', 'sales_credits');
+            static::$salesCreditParent = static::$codeSetsTable->firstWhere('code', 'sales_credits ');
         }
 
         if (!static::$surchargeParent) {
