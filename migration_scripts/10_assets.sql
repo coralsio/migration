@@ -1,3 +1,4 @@
+set FOREIGN_key_checks=0;
     UPDATE jivtf01
     set billthru = NULL
     WHERE billthru = '';
@@ -154,3 +155,5 @@
              LEFT OUTER JOIN pf_new.sites pfs ON j1.custnum = pfs.ID
              LEFT OUTER JOIN jcusf09 j9 ON j1.custnum = j9.custnum
              LEFT JOIN pf_new.code_sets salesrep ON salesrep.code = j9.salecredit AND salesrep.parent_id = 117;
+
+-- delete from pf_new.assets where asset_type_id is null;

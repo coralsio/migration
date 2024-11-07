@@ -1,5 +1,7 @@
 -- UPDATE jcusf01_sites_dbf SET startdate =null WHERE startdate  = '';
 -- UPDATE jcusf01_sites_dbf SET startdate = STR_TO_DATE(startdate,'%d/%m/%Y');
+set FOREIGN_key_checks = 0;
+
 truncate table pf_new.notifications;
 
 INSERT INTO pf_new.notifications (ID,

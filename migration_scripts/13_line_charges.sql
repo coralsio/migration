@@ -71,7 +71,7 @@ SELECT ROW_NUMBER()                                                             
        jx.chrgamt + jx.chrgtax                                               AS                                  total_amount,
        salesrep.id                                                           AS                                  sales_rep_id
 FROM jxchrgf1 jx
-         LEFT JOIN pf_new.sites pfs ON jx.custnum = pfs.id
+         JOIN pf_new.sites pfs ON jx.custnum = pfs.id
          LEFT JOIN pf_new.assets pfa ON pfa.site_id = jx.custnum AND jx.chrgserial = pfa.serial_no
          LEFT JOIN pf_new.work_orders pw ON jx.chrgwono = pw.invno
          LEFT JOIN jcusf09 jc ON jx.custnum = jc.custnum

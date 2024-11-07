@@ -1,3 +1,4 @@
+set FOREIGN_key_checks=0;
 drop temporary table if exists pft;
 
 CREATE

@@ -1,6 +1,6 @@
 -- UPDATE jrtf01 SET rentdate =null WHERE rentdate  = '';
 -- UPDATE jrtf01 SET rentdate = STR_TO_DATE(rentdate ,'%m/%d/%Y');
-
+set FOREIGN_key_checks=0;
 truncate table pf_new.template_work_orders;
 
 INSERT INTO pf_new.template_work_orders (id,

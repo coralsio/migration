@@ -1,3 +1,4 @@
+set FOREIGN_key_checks=0;
 truncate table pf_new.code_sets;
 drop temporary table if exists temp_codesets;
 CREATE TEMPORARY TABLE temp_codesets AS
@@ -149,7 +150,9 @@ VALUES (1, 'address-states-list', 'Address States', 'Address States', NULL, NULL
        (62, 'PE', 'Prince Edward Island', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL),
        (63, 'QC', 'Quebec', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL),
        (64, 'SK', 'Saskatchewan', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL),
-       (65, 'YT', 'Yukon', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL);
+       (65, 'YT', 'Yukon', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL),
+       (66, 'NA', 'NA', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL)
+;
 
 
 insert into pf_new.code_sets(id, code, value, description, editable)
@@ -234,3 +237,21 @@ values ( 'na', 'na', 'na', NULL, 1);
 INSERT INTO pf_new.code_sets (id, code, value, description, parent_id, properties)
 SELECT id, code, value, CAST(description AS CHAR(1024)), parent_id, null
     FROM temp_codesets where code is not null;
+
+
+insert into pf_new.code_sets(code, value, description,parent_id, editable)
+values ( 'PTW', 'PTW', 'PTW',103, 1),
+ ( 'SPT', 'SPT', 'SPT',103, 1),
+ ( 'SPTS', 'SPTS', 'SPTS',103, 1),
+ ( 'SHCA', 'SHCA', 'SHCA',103, 1),
+ ( 'SHCWC', 'SHCWC', 'SHCWC',103, 1),
+ ( 'BC', 'BC', 'BC',103, 1),
+ ( 'PTN', 'PTN', 'PTN',103, 1),
+ ( 'PTS', 'PTS', 'PTS',103, 1),
+ ( 'HCN', 'HCN', 'HCN',103, 1),
+ ( 'PTSW', 'PTSW', 'PTSW',103, 1),
+ ( 'WS', 'WS', 'WS',103, 1),
+ ( 'RPT', 'RPT', 'RPT',103, 1),
+ ( 'HS', 'HS', 'HS',103, 1),
+ ( 'CT', 'CT', 'CT',103, 1),
+ ( 'EXEC', 'EXEC', 'EXEC',103, 1);

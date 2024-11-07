@@ -1,3 +1,4 @@
+set FOREIGN_key_checks=0;
 truncate table pf_new.work_order_services;
 
 INSERT INTO pf_new.work_order_services (id, work_order_id, rate_code_code, rate_code_id, template_work_order_service_id,
@@ -5,7 +6,7 @@ INSERT INTO pf_new.work_order_services (id, work_order_id, rate_code_code, rate_
 SELECT @rownum := @rownum + 1 AS id,
     pf.id AS work_order_id,
     jt.ratecode1 AS rate_code_code,
-    COALESCE((SELECT id FROM pf_new.code_sets cs WHERE cs.code = jt.ratecode1 AND parent_id = 106), NULL) AS rate_code_id,
+    COALESCE((SELECT id FROM pf_new.code_sets cs WHERE cs.code = jt.ratecode1 AND parent_id = 106), 5092) AS rate_code_id,
     NULL AS template_work_order_service_id,
     COALESCE((SELECT id FROM pf_new.code_sets WHERE code = typesrv AND parent_id = 111 LIMIT 1), NULL) AS service_type_id,
     jt.ratecode1 AS rate_code_value,

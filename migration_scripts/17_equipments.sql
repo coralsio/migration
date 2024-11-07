@@ -1,3 +1,4 @@
+set FOREIGN_key_checks = 0;
 truncate table pf_new.equipments;
 
 INSERT INTO pf_new.equipments (ID,
@@ -34,13 +35,13 @@ pf.id AS site_id,
     a.tkcover AS cover,
     a.tkout AS `condition`,
     a.tkmemo AS notes,
-    CASE 
-        WHEN UPPER(a.tkmaplat) = '' THEN '0' 
+    CASE
+        WHEN UPPER(a.tkmaplat) = '' THEN '0'
         ELSE a.tkmaplat
 END
 AS latitude,
-    CASE 
-        WHEN UPPER(a.tkmaplong) = '' THEN '0' 
+    CASE
+        WHEN UPPER(a.tkmaplong) = '' THEN '0'
         ELSE a.tkmaplong
 END
 AS longitude

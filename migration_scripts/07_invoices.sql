@@ -1,3 +1,5 @@
+set FOREIGN_key_checks=0;
+set sql_mode ='';
 drop temporary table if exists tax;
 CREATE
 TEMPORARY TABLE tax AS
@@ -12,8 +14,7 @@ GROUP BY chrginv;
 
 
 DROP PROCEDURE IF EXISTS UpdateTaxAmounts;
-DELIMITER
-//
+DELIMITER //
 
 CREATE PROCEDURE UpdateTaxAmounts()
 BEGIN
@@ -40,8 +41,7 @@ WHERE
 SET
 row_count = ROW_COUNT();
 END WHILE;
-END
-//
+END //
 
 DELIMITER ;
 

@@ -103,6 +103,7 @@ return [
         'site' => [
             'old_table' => 'jcusf01_sites_dbf',
             'identifier_record' => 'CUSTNUM',
+            'orderBy_column' => 'CUSTNUM',
             'mapping' => [
                 'sites' => [
                     'table_has_auditable' => false,

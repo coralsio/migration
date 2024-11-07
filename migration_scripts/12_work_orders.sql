@@ -1,3 +1,4 @@
+set FOREIGN_key_checks = 0;
 -- UPDATE jtktf01 SET reqdate = NULL WHERE reqdate ='';
 -- UPDATE jtktf01 SET reqdate = STR_TO_DATE(reqdate, '%m/%d/%Y');
 
@@ -6,15 +7,19 @@
 
 truncate table pf_new.work_orders;
 
+UPDATE pf_old.jtktf01
+SET reqdate = '1990-01-01'
+WHERE reqdate < '1970-01-01';
+
 INSERT INTO pf_new.work_orders (id, dispatched, site_id, sales_rep_id, Invoice_ID, status_id, is_recurring, type,
                                 po_number, processed, route_id, route_schedule_id, scheduled_time, scheduled_date,
                                 requested_time, invoice_note, route_note, cod, driver_id, truck_id, stop_number,
                                 created_at,
-                                -- autoid,
+    -- autoid,
                                 custnum,
                                 invno
-                                -- mediajoinkey
-                                )
+    -- mediajoinkey
+)
 SELECT ROW_NUMBER()                                                                                                OVER(ORDER BY jk.custnum ASC) AS id, 1 AS dispatched,
        pf.id                                                                                                    AS site_id,
        COALESCE((SELECT id FROM pf_new.code_sets cs WHERE code = jk.tktsale AND parent_id = 117 LIMIT
@@ -31,8 +36,8 @@ SELECT ROW_NUMBER()                                                             
                                     END
                 FROM pf_new.code_sets
                 WHERE code = jk.typesrv
-                  AND parent_id = 111), NULL
-           )                                                                                                    AS type,              -- defaulting to service, but should be changed in PF DB
+                  AND parent_id = 111), 'Service'
+       )                                                                                                    AS type,              -- defaulting to service, but should be changed in PF DB
        jk.ponum                                                                                                 AS po_number,
        1                                                                                                        AS processed,
        COALESCE((SELECT id FROM pf_new.routes WHERE code = jk.grpcode LIMIT 1), NULL)                           AS route_id,
@@ -42,17 +47,17 @@ SELECT ROW_NUMBER()                                                             
        RTRIM(jk.reqtime)                                                                                        AS requested_time,
        jk.ratememo                                                                                              AS invoice_note,
        jk.notememo                                                                                              AS route_note,
-       jk.tktcash                                                                                               AS cod,
+       COALESCE(NULLIF(jk.tktcash,'')     ,0)                                                                                          AS cod,
        COALESCE((SELECT id FROM pf_new.code_sets WHERE code = jk.driver AND parent_id = 115 LIMIT
                 1), NULL)                                                                                       AS driver_id,         -- driver blank in code_sets mapping
        COALESCE((SELECT id FROM pf_new.code_sets WHERE code = jk.truck AND parent_id = 110 LIMIT
                 1), NULL)                                                                                       AS truck_id,
-       jk.stopnum                                                                                               AS stop_number,
+       COALESCE(nullif(jk.stopnum,''),0)                                                                                               AS stop_number,
        jk.reqdate                                                                                               AS created_at,
        -- autoid,
        jk.custnum,
        jk.invno
-    --   jk.AutoID                                                                                                as mediajoinkey
+--   jk.AutoID                                                                                                as mediajoinkey
 FROM jtktf01 jk
          LEFT OUTER JOIN pf_new.sites pf ON jk.custnum = pf.id;
 

@@ -1,4 +1,5 @@
 -- Declare variables in MySQL
+set FOREIGN_key_checks = 0;
 SET
 @firstSunday := CASE
                         WHEN DAYOFWEEK(DATE(CONCAT(YEAR(CURDATE()), '-', MONTH(CURDATE()), '-01'))) = 1
@@ -134,7 +135,7 @@ INSERT INTO pf_new.template_work_order_services (id,
 SELECT @rownum := @rownum + 1 AS id,
     pft.id AS template_work_order_id,
     COALESCE((SELECT id FROM pf_new.code_sets WHERE description = 'SERVICE TICKET' AND parent_id = 111), NULL) AS service_type_id,
-   COALESCE((SELECT id FROM pf_new.code_sets WHERE code = 'S' AND parent_id = 106), 157) AS rate_code_id,
+   COALESCE((SELECT id FROM pf_new.code_sets WHERE code = 'S' AND parent_id = 106), 5092) AS rate_code_id,
     'Service' AS description,
     CAST(jt.rtquan AS DECIMAL(19,2)) AS quantity,
     'Service' AS rate_code_code,
@@ -196,16 +197,7 @@ AS scheduling_start_date,
         WHEN routeday = 'U' THEN @sunday
 END
 AS next_service_date,
-    COALESCE((SELECT id FROM pf_new.routes p WHERE p.route_number = jt.routenum AND
-            (CASE
-                 WHEN p.route_day = 'Mo' THEN 'M'
-                 WHEN p.route_day = 'Tu' THEN 'T'
-                 WHEN p.route_day = 'We' THEN 'W'
-                 WHEN p.route_day = 'Th' THEN 'H'
-                 WHEN p.route_day = 'Fr' THEN 'F'
-                 WHEN p.route_day = 'Sa' THEN 'S'
-                 WHEN p.route_day = 'Su' THEN 'U'
-                END) = jt.routeday), NULL) AS route_id,
+    COALESCE((SELECT id FROM pf_new.routes p WHERE p.code = jt.ROUTECODE),null) AS route_id,
     CASE
         WHEN CAST(jt.stopnum AS SIGNED) = 0 THEN NULL
         ELSE CAST(jt.stopnum AS SIGNED)
@@ -371,7 +363,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
        ROW_NUMBER()                                                                                       OVER(ORDER BY jr.custnum ASC) AS id, pft.id AS template_work_order_id,
        COALESCE((SELECT id FROM pf_new.code_sets WHERE code = jr.rttypetkt AND parent_id = 111),
                 NULL)                                                                                  AS service_type_id,
-       COALESCE((SELECT id FROM pf_new.code_sets WHERE code = jr.rtratecode AND parent_id = 106), 157) AS rate_code_id,
+       COALESCE((SELECT id FROM pf_new.code_sets WHERE code = jr.rtratecode AND parent_id = 106), 5092) AS rate_code_id,
        COALESCE((SELECT description FROM pf_new.code_sets WHERE code = jr.rtratecode AND parent_id = 106),
                 jr.rtratecode)                                                                         AS description,
        COALESCE(jr.rtqty, 0)                                                                           AS quantity,
@@ -424,7 +416,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS sunday_stop_number,
        CASE
            WHEN (rtday = 'U' OR WEEKDAY(rtnxtdate) = 0) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS sunday_route_id,
        CASE
            WHEN (rtday = 'M' OR WEEKDAY(rtnxtdate) = 1)
@@ -437,7 +429,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS monday_stop_number,
        CASE
            WHEN (rtday = 'M' OR WEEKDAY(rtnxtdate) = 1) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS monday_route_id,
        CASE
            WHEN (rtday = 'T' OR WEEKDAY(rtnxtdate) = 2)
@@ -450,7 +442,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS tuesday_stop_number,
        CASE
            WHEN (rtday = 'T' OR WEEKDAY(rtnxtdate) = 2) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS tuesday_route_id,
        CASE
            WHEN (rtday = 'W' OR WEEKDAY(rtnxtdate) = 3)
@@ -463,7 +455,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS wednesday_stop_number,
        CASE
            WHEN (rtday = 'W' OR WEEKDAY(rtnxtdate) = 3) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS wednesday_route_id,
        CASE
            WHEN (rtday = 'H' OR WEEKDAY(rtnxtdate) = 4)
@@ -476,7 +468,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS thursday_stop_number,
        CASE
            WHEN (rtday = 'H' OR WEEKDAY(rtnxtdate) = 4) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS thursday_route_id,
        CASE
            WHEN (rtday = 'F' OR WEEKDAY(rtnxtdate) = 5)
@@ -489,7 +481,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS friday_stop_number,
        CASE
            WHEN (rtday = 'F' OR WEEKDAY(rtnxtdate) = 5) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS friday_route_id,
        CASE
            WHEN (rtday = 'S' OR WEEKDAY(rtnxtdate) = 6)
@@ -502,7 +494,7 @@ SELECT (SELECT MAX(id) FROM pf_new.template_work_order_services) +
            END                                                                                         AS saturday_stop_number,
        CASE
            WHEN (rtday = 'S' OR WEEKDAY(rtnxtdate) = 6) THEN COALESCE(
-                       (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
+                   (SELECT id FROM pf_new.routes p WHERE p.code = jr.rtnum), NULL)
            END                                                                                         AS saturday_route_id,
        jr.rtentdate                                                                                    AS created_at
 FROM jrtf05 jr
@@ -511,13 +503,7 @@ FROM jrtf05 jr
 
 
 
-#
-UPDATE pf_new.template_work_order_services
-    #
-SET next_service_date = DATE_ADD(next_service_date, INTERVAL 1 WEEK) #
-WHERE rtsrvcode = 'EVEN';
-#
-rtsrvcode missing
+
 DROP
 TEMPORARY TABLE IF EXISTS tempA;
 
@@ -719,9 +705,9 @@ SELECT CONCAT(
                        (CASE WHEN Friday_stop_numb = 1 THEN '"Friday",' ELSE '' END),
                        (CASE WHEN Saturday_stop_numb = 1 THEN '"Saturday",' ELSE '' END),
                        (CASE WHEN Sunday_stop_numb = 1 THEN '"Sunday",' ELSE '' END)
-                   )),
+                                      )),
                ']}'
-           ) AS scheduling_options,
+       ) AS scheduling_options,
        temp_data.id,
        temp_data.template_work_order_id,
        temp_data.service_type_id,
@@ -779,7 +765,7 @@ SET route_note = LTRIM(RTRIM(route_note));
 UPDATE pf_new.template_work_order_services
 SET scheduling_options = CONCAT(
     LEFT(RTRIM(scheduling_options), CHAR_LENGTH(RTRIM(scheduling_options)) - 1), ']}'
-    )
+                         )
 WHERE scheduling_options LIKE '%,]}';
 
 

@@ -7,6 +7,11 @@
 -- UPDATE jpayf01 SET postdate =null WHERE postdate  = '';
 -- UPDATE jpayf01 SET postdate = STR_TO_DATE(postdate, '%m/%d/%Y');
 
+set FOREIGN_key_checks = 0;
+
+UPDATE pf_old.jpayf01
+SET pentdate = '1990-01-01'
+WHERE pentdate < '1970-01-01';
 
 DROP
 TEMPORARY TABLE IF EXISTS cardtypes;
@@ -30,7 +35,7 @@ truncate table pf_new.payments;
 INSERT INTO pf_new.payments (ID, invoice_id, payment_date, check_date, post_date, card_type, batch_id, check_amount,
                              amount, tax_paid, tax_1_amount, method, eft_check, note, customer_id, site_id, created_at)
 SELECT ROW_NUMBER()                     OVER(ORDER BY jp.invoice ASC) AS ID, jp.invoice AS invoice_id,
-       jp.pentdate                   AS payment_date,
+       COALESCE (jp.pentdate , '1970-01-01')                 AS payment_date,
        jp.checkdate                  AS check_date,
        jp.postdate                   AS post_date,
        ct.cardtype                   AS card_type,
