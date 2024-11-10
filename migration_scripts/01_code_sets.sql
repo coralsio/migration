@@ -1,7 +1,10 @@
-set FOREIGN_key_checks=0;
+set
+FOREIGN_key_checks=0;
 truncate table pf_new.code_sets;
-drop temporary table if exists temp_codesets;
-CREATE TEMPORARY TABLE temp_codesets AS
+drop
+temporary table if exists temp_codesets;
+CREATE
+TEMPORARY TABLE temp_codesets AS
 SELECT null          as ID,
        TRIM(refcode) AS code,
        TRIM(refcode) AS `value`,
@@ -13,63 +16,64 @@ SELECT null          as ID,
        parent_id,
        0             AS editable,
        0             AS deletable
-FROM (
-         SELECT refcode, refdesc, refmemo, 100 AS parent_id
-         FROM jref004
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 101
-         FROM jref006
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 102
-         FROM jref089
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 103
-         FROM jref007
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 104
-         FROM jref007
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 105
-         FROM jref050
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 106
-         FROM jref015
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 107
-         FROM jref013
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 108
-         FROM jref052
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 109
-         FROM jref054
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 110
-         FROM jref0n2
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 111
-         FROM jref001
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 112
-         FROM jref004
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 113
-         FROM jref091
-         UNION ALL
-         SELECT refcode, refdesc, refmemo, 117
-         FROM jref030
-     ) AS combined_data;
+FROM (SELECT refcode, refdesc, refmemo, 100 AS parent_id
+      FROM jref004
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 101
+      FROM jref006
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 102
+      FROM jref089
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 103
+      FROM jref007
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 104
+      FROM jref007
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 105
+      FROM jref050
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 106
+      FROM jref015
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 107
+      FROM jref013
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 108
+      FROM jref052
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 109
+      FROM jref054
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 110
+      FROM jref0n2
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 111
+      FROM jref001
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 112
+      FROM jref004
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 113
+      FROM jref091
+      UNION ALL
+      SELECT refcode, refdesc, refmemo, 117
+      FROM jref030) AS combined_data;
 
 -- Step 1: Set the initial row number
-SET @row_num := 5000;
+SET
+@row_num := 5000;
 
 ALTER TABLE temp_codesets
     MODIFY COLUMN ID BIGINT;
 
-DROP TEMPORARY TABLE IF EXISTS temp_codesets_with_ids;
+DROP
+TEMPORARY TABLE IF EXISTS temp_codesets_with_ids;
 
 -- Step 2: Create a temporary table to hold the data with ordered row numbers
-CREATE TEMPORARY TABLE temp_codesets_with_ids AS
+CREATE
+TEMPORARY TABLE temp_codesets_with_ids AS
 SELECT @row_num := @row_num + 1 AS ID, parent_id, code, value, Description, editable, deletable
 FROM temp_codesets
 ORDER BY parent_id, code;
@@ -82,7 +86,8 @@ SELECT ID, parent_id, code, value, Description, editable, deletable
 FROM temp_codesets_with_ids;
 
 -- Step 4: Drop the temporary table (optional, will be dropped automatically at the end of the session)
-DROP TEMPORARY TABLE IF EXISTS temp_codesets_with_ids;
+DROP
+TEMPORARY TABLE IF EXISTS temp_codesets_with_ids;
 
 INSERT INTO pf_new.code_sets
 (id, code, value, description, parent_id, properties, editable, deletable,
@@ -231,27 +236,32 @@ insert into pf_new.code_sets(id, code, value, description, parent_id, editable)
 values (99997, '', '', 'Bad Data', NULL, 1);
 
 
-insert into pf_new.code_sets( code, value, description, parent_id, editable)
-values ( 'na', 'na', 'na', NULL, 1);
+insert into pf_new.code_sets(code, value, description, parent_id, editable)
+values ('na', 'na', 'na', NULL, 1);
 
 INSERT INTO pf_new.code_sets (id, code, value, description, parent_id, properties)
 SELECT id, code, value, CAST(description AS CHAR(1024)), parent_id, null
-    FROM temp_codesets where code is not null;
+FROM temp_codesets
+where code is not null;
 
 
-insert into pf_new.code_sets(code, value, description,parent_id, editable)
-values ( 'PTW', 'PTW', 'PTW',103, 1),
- ( 'SPT', 'SPT', 'SPT',103, 1),
- ( 'SPTS', 'SPTS', 'SPTS',103, 1),
- ( 'SHCA', 'SHCA', 'SHCA',103, 1),
- ( 'SHCWC', 'SHCWC', 'SHCWC',103, 1),
- ( 'BC', 'BC', 'BC',103, 1),
- ( 'PTN', 'PTN', 'PTN',103, 1),
- ( 'PTS', 'PTS', 'PTS',103, 1),
- ( 'HCN', 'HCN', 'HCN',103, 1),
- ( 'PTSW', 'PTSW', 'PTSW',103, 1),
- ( 'WS', 'WS', 'WS',103, 1),
- ( 'RPT', 'RPT', 'RPT',103, 1),
- ( 'HS', 'HS', 'HS',103, 1),
- ( 'CT', 'CT', 'CT',103, 1),
- ( 'EXEC', 'EXEC', 'EXEC',103, 1);
+insert into pf_new.code_sets(code, value, description, parent_id, editable)
+values ('PTW', 'PTW', 'PTW', 103, 1),
+       ('SPT', 'SPT', 'SPT', 103, 1),
+       ('SPTS', 'SPTS', 'SPTS', 103, 1),
+       ('SHCA', 'SHCA', 'SHCA', 103, 1),
+       ('SHCWC', 'SHCWC', 'SHCWC', 103, 1),
+       ('BC', 'BC', 'BC', 103, 1),
+       ('PTN', 'PTN', 'PTN', 103, 1),
+       ('PTS', 'PTS', 'PTS', 103, 1),
+       ('HCN', 'HCN', 'HCN', 103, 1),
+       ('PTSW', 'PTSW', 'PTSW', 103, 1),
+       ('WS', 'WS', 'WS', 103, 1),
+       ('RPT', 'RPT', 'RPT', 103, 1),
+       ('HS', 'HS', 'HS', 103, 1),
+       ('CT', 'CT', 'CT', 103, 1),
+       ('EXEC', 'EXEC', 'EXEC', 103, 1);
+
+insert into pf_new.code_sets(code, value, description, parent_id, editable)
+values ('RENTM', 'RENTM', 'RENTM', 106, 1),
+       ('RENTW', 'RENTW', 'RENTW', 106, 1);
