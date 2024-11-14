@@ -157,3 +157,5 @@ FROM jreff01 a
 update pf_new.divisions set billing_setting_terms = 'NET30';
 -- update pf_new.divisions set invoice_setting_message_2 = StripHTML2(invoice_setting_message_2);
 update pf_new.divisions set invoice_setting_iaf_days_to_advance = '14' where invoice_setting_iaf_days_to_advance = '0';
+
+update pf_new.divisions set is_default = 1 limit 1;

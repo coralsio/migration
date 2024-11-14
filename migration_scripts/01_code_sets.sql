@@ -265,3 +265,6 @@ values ('PTW', 'PTW', 'PTW', 103, 1),
 insert into pf_new.code_sets(code, value, description, parent_id, editable)
 values ('RENTM', 'RENTM', 'RENTM', 106, 1),
        ('RENTW', 'RENTW', 'RENTW', 106, 1);
+
+insert into pf_new.code_sets(code, value, description, parent_id, editable)
+values ('Completed', 'Completed', 'Completed', 107, 1);
