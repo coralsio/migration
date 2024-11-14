@@ -95,7 +95,8 @@ return [
                         'default_surcharge_rate' => 0,
                         'customer_bill_through_date_selection' => 'Earliest',
                         'default_bill_type' => '28 Day Fixed',
-                        'scheduling_settings' => 'Arrears'
+                        'scheduling_settings' => 'Arrears',
+                        'division_id' => 9,
                     ]
                 ],
             ]
