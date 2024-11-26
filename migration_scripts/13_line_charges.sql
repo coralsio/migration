@@ -76,7 +76,7 @@ FROM jxchrgf1 jx
          LEFT JOIN pf_new.work_orders pw ON jx.chrgwono = pw.invno
          LEFT JOIN jcusf09 jc ON jx.custnum = jc.custnum
          LEFT JOIN pf_new.code_sets salesrep ON salesrep.code = jc.salecredit AND salesrep.parent_id = 117
-WHERE jx.chrginv = 0;
+where chrgdate >= '01/01/2019';
 
 UPDATE pf_new.line_charges
 SET quantity = CAST(quantity AS DECIMAL(10, 0))
