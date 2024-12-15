@@ -96,7 +96,7 @@ return [
                         'customer_bill_through_date_selection' => 'Earliest',
                         'default_bill_type' => '28 Day Fixed',
                         'scheduling_settings' => 'Arrears',
-                        'division_id' => 9,
+//                        'division_id' => 9
                     ]
                 ],
             ]
@@ -114,7 +114,7 @@ return [
                         'tax_manual_override' => 1,
                         'default_bill_type' => '28 Day Fixed',
                         'scheduling_settings' => 'Arrears',
-                        'division_id' => 9,
+//                        'division_id' => 9,
                     ],
                     'mapping_array' => [
 //                        'ACCTSTATUS' => [

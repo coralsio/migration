@@ -40,6 +40,8 @@ class MigrationHandlers
      */
     protected static $naCustomerId;
 
+    protected static $divisionsTable;
+
     /**
      * @param $oldRecord
      * @param $oldColumn
@@ -465,6 +467,17 @@ class MigrationHandlers
      */
     public static function preStoreCustomerRecord($oldRecord, &$newRecord)
     {
+        if (!static::$divisionsTable) {
+            static::$divisionsTable = DB::table('divisions')->select([
+                'division_code',
+                'id'
+            ])->get();
+        }
+
+        if (empty($newRecord['division_id'])) {
+            $newRecord['division_id'] = static::$divisionsTable->first()->id;
+        }
+
         if (!static::$codeSetsTable) {
             static::$codeSetsTable = DB::table('code_sets')->select([
                 'code',
@@ -610,6 +623,17 @@ class MigrationHandlers
     public static function preStoreSiteRecord($oldRecord, &$newRecord)
     {
         $contact2FirstName = data_get($newRecord, 'contact_2_first_name');
+
+        if (!static::$divisionsTable) {
+            static::$divisionsTable = DB::table('divisions')->select([
+                'division_code',
+                'id'
+            ])->get();
+        }
+
+        if (empty($newRecord['division_id'])) {
+            $newRecord['division_id'] = static::$divisionsTable->first()->id;
+        }
 
         if ($contact2FirstName && $contact2FirstName <> 'NA' && Str::contains($contact2FirstName, ' ')) {
             $newRecord['contact_2_first_name'] = Str::of($contact2FirstName)->before(' ')->__toString();
