@@ -1,7 +1,7 @@
 set FOREIGN_key_checks = 0;
-truncate table pf_new.equipments;
+truncate table {db_new}.equipments;
 
-INSERT INTO pf_new.equipments (ID,
+INSERT INTO {db_new}.equipments (ID,
                                site_id,
                                template_work_order_id,
                                work_order_id,
@@ -24,7 +24,7 @@ pf.id AS site_id,
        0                                     AS work_order_id,
        COALESCE(
                (SELECT id
-                FROM pf_new.code_sets
+                FROM {db_new}.code_sets
                 WHERE code = a.tktype
                   AND parent_id = 104), 104) AS type_id,
        a.tkloc                               AS description,
@@ -46,5 +46,5 @@ AS latitude,
 END
 AS longitude
 -- ,a.ID as mediajoinkey
-FROM jtnkf01 a
-INNER JOIN pf_new.sites pf ON a.custnum = pf.id
+FROM {db_old}.jtnkf01 a
+INNER JOIN {db_new}.sites pf ON a.custnum = pf.id

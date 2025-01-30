@@ -9,7 +9,7 @@
 
 set FOREIGN_key_checks = 0;
 
-UPDATE pf_old.jpayf01
+UPDATE {db_old}.jpayf01
 SET pentdate = '1990-01-01'
 WHERE pentdate < '1970-01-01';
 
@@ -26,13 +26,13 @@ SELECT DISTINCT checknum,
     WHEN LEFT (checknum, 1) = 'M' THEN 'MC'
 END
 AS cardtype
-FROM jpayf01
+FROM {db_old}.jpayf01
 WHERE LEFT(checknum, 1) IN ('A', 'M', 'D', 'V')
   AND checknum NOT LIKE 'AD%';
 
-truncate table pf_new.payments;
+truncate table {db_new}.payments;
 
-INSERT INTO pf_new.payments (ID, invoice_id, payment_date, check_date, post_date, card_type, batch_id, check_amount,
+INSERT INTO {db_new}.payments (ID, invoice_id, payment_date, check_date, post_date, card_type, batch_id, check_amount,
                              amount, tax_paid, tax_1_amount, method, eft_check, note, customer_id, site_id, created_at)
 SELECT ROW_NUMBER()                     OVER(ORDER BY jp.invoice ASC) AS ID, jp.invoice AS invoice_id,
        COALESCE (jp.pentdate , '1970-01-01')                 AS payment_date,
@@ -50,32 +50,32 @@ SELECT ROW_NUMBER()                     OVER(ORDER BY jp.invoice ASC) AS ID, jp.
        ps.customer_id,
        ps.id                         AS site_id,
        jp.pentdate                   AS created_at
-FROM jpayf01 jp
-         LEFT OUTER JOIN pf_new.sites ps ON jp.custnum = ps.id
+FROM {db_old}.jpayf01 jp
+         LEFT OUTER JOIN {db_new}.sites ps ON jp.custnum = ps.id
          LEFT OUTER JOIN cardtypes ct ON jp.checknum = ct.checknum;
 
 
 -- Update method to 'CC' for specific values
-UPDATE pf_new.payments
+UPDATE {db_new}.payments
 SET method = 'CC'
 WHERE method IN ('AMEX', 'MC', 'V', 'VISA', 'AME', 'DIS', 'DISC', 'VI', 'VS', 'VIS');
 
 -- Update method to 'Check' where eft_check is numeric
-UPDATE pf_new.payments
+UPDATE {db_new}.payments
 SET method = 'Check'
 WHERE eft_check REGEXP '^[0-9]+$';
 
 -- Update method to 'Other' where method contains 'CASH'
-UPDATE pf_new.payments
+UPDATE {db_new}.payments
 SET method = 'Other'
 WHERE method LIKE '%CASH%';
 
 -- Update method to 'Other' where method contains 'ADJ'
-UPDATE pf_new.payments
+UPDATE {db_new}.payments
 SET method = 'Other'
 WHERE method LIKE '%ADJ%';
 
 -- Update method to 'Other' for all remaining non-matching methods
-UPDATE pf_new.payments
+UPDATE {db_new}.payments
 SET method = 'Other'
 WHERE method NOT IN ('CC', 'Check', 'Other');

@@ -1,9 +1,9 @@
 -- UPDATE jrtf01 SET rentdate =null WHERE rentdate  = '';
 -- UPDATE jrtf01 SET rentdate = STR_TO_DATE(rentdate ,'%m/%d/%Y');
 set FOREIGN_key_checks=0;
-truncate table pf_new.template_work_orders;
+truncate table {db_new}.template_work_orders;
 
-INSERT INTO pf_new.template_work_orders (id,
+INSERT INTO {db_new}.template_work_orders (id,
                                          site_id,
                                          po_number,
                                          billing_note,
@@ -13,7 +13,7 @@ INSERT INTO pf_new.template_work_orders (id,
                                          asset_route_id,
                                          created_at,
     --   autoid,
-                                         custnum,
+--                                          custnum,
                                          sales_rep_id)
 SELECT ROW_NUMBER()                   OVER (ORDER BY jrt.custnum) AS id, pf.id AS site_id,
        CAST(jc.po_num AS CHAR(24)) AS po_number,
@@ -24,22 +24,22 @@ SELECT ROW_NUMBER()                   OVER (ORDER BY jrt.custnum) AS id, pf.id A
        NULL                        AS asset_route_id,
        jrt.rentdate                AS created_at,
        -- jrt.autoid,
-       jrt.custnum,
+--        jrt.custnum, commented due arrow db
        salesrep.id                 AS sales_rep_id
-FROM jrtf01 jrt
+FROM {db_old}.jrtf01 jrt
          JOIN
-     pf_new.sites pf ON jrt.custnum = pf.id
+     {db_new}.sites pf ON jrt.custnum = pf.id
          LEFT JOIN
-     jcusf01_sites_dbf jc ON jrt.custnum = jc.custnum
+     {db_old}.jcusf01 jc ON jrt.custnum = jc.custnum
          LEFT JOIN
-     jcusf09 j9 ON jc.custnum = j9.custnum
+     {db_old}.jcusf09 j9 ON jc.custnum = j9.custnum
          LEFT JOIN
-     pf_new.code_sets salesrep ON salesrep.code = j9.salecredit AND salesrep.parent_id = 117
+     {db_new}.code_sets salesrep ON salesrep.code = j9.salecredit AND salesrep.parent_id = 117
 ORDER BY jrt.custnum;
 
-INSERT INTO pf_new.template_work_orders (id, site_id, po_number, billing_note, job_note, cod, is_draft, asset_route_id,
-                                         created_at, custnum, sales_rep_id)
-SELECT COALESCE((SELECT MAX(id) FROM pf_new.template_work_orders), 0) + (@rownum := @rownum + 1) AS id,
+INSERT INTO {db_new}.template_work_orders (id, site_id, po_number, billing_note, job_note, cod, is_draft, asset_route_id,
+                                         created_at, sales_rep_id)
+SELECT COALESCE((SELECT MAX(id) FROM {db_new}.template_work_orders), 0) + (@rownum := @rownum + 1) AS id,
        pf.id                                                                                     AS site_id,
        CAST(jc.po_num AS CHAR(24))                                                               AS po_number,
        jc.billfield                                                                              AS billing_note,
@@ -48,26 +48,26 @@ SELECT COALESCE((SELECT MAX(id) FROM pf_new.template_work_orders), 0) + (@rownum
        0                                                                                         AS is_draft,
        NULL                                                                                      AS asset_route_id,
        jr.rtentdate                                                                              AS created_at,
-       jr.custnum                                                                                as custnum,
+--        jr.custnum    commented due arrow db                                                                            as custnum,
        salesrep.id                                                                               AS sales_rep_id
-FROM jrtf05 jr
-         inner JOIN pf_new.sites pf ON jr.custnum = pf.id
-         LEFT JOIN jcusf01_sites_dbf jc ON jr.custnum = jc.custnum
-         LEFT JOIN jcusf09 j9 ON jc.custnum = j9.custnum
-         LEFT JOIN pf_new.code_sets salesrep ON salesrep.code = j9.salecredit AND salesrep.parent_id = 117
+FROM {db_old}.jrtf05 jr
+         inner JOIN {db_new}.sites pf ON jr.custnum = pf.id
+         LEFT JOIN {db_old}.jcusf01 jc ON jr.custnum = jc.custnum
+         LEFT JOIN {db_old}.jcusf09 j9 ON jc.custnum = j9.custnum
+         LEFT JOIN {db_new}.code_sets salesrep ON salesrep.code = j9.salecredit AND salesrep.parent_id = 117
          CROSS JOIN (SELECT @rownum := 0) r;
 
 
-update pf_new.template_work_orders
+update {db_new}.template_work_orders
 set created_at ='1990-01-01'
 where created_at < '1990-01-01'
    or created_at > '2030-01-01';
 
 
 
-update pf_new.template_work_orders
+update {db_new}.template_work_orders
 set billing_note = REGEXP_REPLACE(billing_note, '<[^>]*>', '');
-update pf_new.template_work_orders
+update {db_new}.template_work_orders
 set job_note = REGEXP_REPLACE(job_note, '<[^>]*>', '');
 
 DROP
@@ -84,19 +84,21 @@ SELECT MIN(id)             AS id,
        MIN(is_draft)       AS is_draft,
        MIN(asset_route_id) AS asset_route_id,
        MIN(created_at)     AS created_at,
-       MIN(custnum)        AS custnum,
+--        MIN(custnum)        AS custnum, commented due arrow db
        MIN(sales_rep_id)   AS sales_rep_id
-FROM pf_new.template_work_orders
+FROM {db_new}.template_work_orders
 GROUP BY site_id;
 
 SET
 foreign_key_checks=0;
-truncate table pf_new.template_work_orders;
+truncate table {db_new}.template_work_orders;
 SET
 foreign_key_checks=1;
 
-INSERT INTO pf_new.template_work_orders (id, site_id, po_number, billing_note, job_note, cod, is_draft, asset_route_id,
-                                         created_at, custnum, sales_rep_id)
+INSERT INTO {db_new}.template_work_orders (id, site_id, po_number, billing_note, job_note, cod, is_draft, asset_route_id,
+                                         created_at,
+--                                          custnum, commented due arrow db
+                                         sales_rep_id)
 SELECT id,
        site_id,
        po_number,
@@ -106,6 +108,6 @@ SELECT id,
        is_draft,
        asset_route_id,
        created_at,
-       custnum,
+--        custnum, commented due arrow db
        sales_rep_id
 FROM pftwo;

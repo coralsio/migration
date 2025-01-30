@@ -12,9 +12,9 @@
 -- UPDATE jxchrgf1 SET xentdate = STR_TO_DATE(xentdate, '%m/%d/%Y');
 
 
-truncate table pf_new.line_charges;
+truncate table {db_new}.line_charges;
 
-INSERT INTO pf_new.line_charges (ID,
+INSERT INTO {db_new}.line_charges (ID,
                                  work_order_service_id,
                                  user_id,
                                  unique_id,
@@ -43,7 +43,7 @@ INSERT INTO pf_new.line_charges (ID,
                                  total_amount,
                                  sales_rep_id)
 SELECT ROW_NUMBER()                                                                                              OVER(ORDER BY jx.custnum ASC) AS ID, NULL AS work_order_service_id,
-       COALESCE((SELECT id FROM pf_new.code_sets WHERE code = jx.chrgclerk AND parent_id = 100 LIMIT
+       COALESCE((SELECT id FROM {db_new}.code_sets WHERE code = jx.chrgclerk AND parent_id = 100 LIMIT
                 1), 100)                                                     AS                                  user_id,
        jx.chrgid                                                             AS                                  unique_id,
        NULL                                                                  AS                                  work_order_asset_id,
@@ -70,49 +70,50 @@ SELECT ROW_NUMBER()                                                             
        jx.xentdate                                                           AS                                  created_at,
        jx.chrgamt + jx.chrgtax                                               AS                                  total_amount,
        salesrep.id                                                           AS                                  sales_rep_id
-FROM jxchrgf1 jx
-         JOIN pf_new.sites pfs ON jx.custnum = pfs.id
-         LEFT JOIN pf_new.assets pfa ON pfa.site_id = jx.custnum AND jx.chrgserial = pfa.serial_no
-         LEFT JOIN pf_new.work_orders pw ON jx.chrgwono = pw.invno
-         LEFT JOIN jcusf09 jc ON jx.custnum = jc.custnum
-         LEFT JOIN pf_new.code_sets salesrep ON salesrep.code = jc.salecredit AND salesrep.parent_id = 117
+FROM {db_old}.jxchrgf1 jx
+         JOIN {db_new}.sites pfs ON jx.custnum = pfs.id
+         LEFT JOIN {db_new}.assets pfa ON pfa.site_id = jx.custnum AND jx.chrgserial = pfa.serial_no
+--          LEFT JOIN {db_new}.work_orders pw ON jx.chrgwono = pw.invno //commented due arrow db
+         LEFT JOIN {db_new}.work_orders pw ON jx.CHRGINV = pw.invoice_id -- added due arrow db
+         LEFT JOIN {db_old}.jcusf09 jc ON jx.custnum = jc.custnum
+         LEFT JOIN {db_new}.code_sets salesrep ON salesrep.code = jc.salecredit AND salesrep.parent_id = 117
 where chrgdate >= '01/01/2019';
 
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET quantity = CAST(quantity AS DECIMAL(10, 0))
 WHERE quantity > 999999;
 
 -- Update the work_order_id where it is 0
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET work_order_id = 9999999
 WHERE work_order_id = 0;
 
 -- Update bill_service_date where it is earlier than '1930-01-01'
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET bill_service_date = '1990-01-01'
 WHERE bill_service_date < '1930-01-01';
 
 -- Update bill_through_date where it is earlier than '1930-01-01'
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET bill_through_date = '1990-01-01'
 WHERE bill_through_date < '1930-01-01';
 
 -- Update start_date where it is earlier than '1930-01-01'
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET start_date = '1990-01-01'
 WHERE start_date < '1930-01-01';
 
 -- Update created_at where it is earlier than '1930-01-01'
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET created_at = '1990-01-01'
 WHERE created_at < '1930-01-01';
 
 -- Delete records where invoice_id does not exist in pfinvoices
 DELETE
-FROM pf_new.line_charges
-WHERE invoice_id NOT IN (SELECT id FROM pf_new.invoices);
+FROM {db_new}.line_charges
+WHERE invoice_id NOT IN (SELECT id FROM {db_new}.invoices);
 
 -- Update escape character :)
-UPDATE pf_new.line_charges
+UPDATE {db_new}.line_charges
 SET description = REPLACE(description, '\\', '-')
 WHERE description LIKE '%\\\\%';

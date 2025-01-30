@@ -1,6 +1,6 @@
 set
 FOREIGN_key_checks=0;
-truncate table pf_new.code_sets;
+truncate table {db_new}.code_sets;
 drop
 temporary table if exists temp_codesets;
 CREATE
@@ -17,49 +17,49 @@ SELECT null          as ID,
        0             AS editable,
        0             AS deletable
 FROM (SELECT refcode, refdesc, refmemo, 100 AS parent_id
-      FROM jref004
+      FROM {db_old}.jref004
       UNION ALL
       SELECT refcode, refdesc, refmemo, 101
-      FROM jref006
+      FROM {db_old}.jref006
       UNION ALL
       SELECT refcode, refdesc, refmemo, 102
-      FROM jref089
+      FROM {db_old}.jref089
       UNION ALL
       SELECT refcode, refdesc, refmemo, 103
-      FROM jref007
+      FROM {db_old}.jref007
       UNION ALL
       SELECT refcode, refdesc, refmemo, 104
-      FROM jref007
+      FROM {db_old}.jref007
       UNION ALL
       SELECT refcode, refdesc, refmemo, 105
-      FROM jref050
+      FROM {db_old}.jref050
       UNION ALL
       SELECT refcode, refdesc, refmemo, 106
-      FROM jref015
+      FROM {db_old}.jref015
       UNION ALL
       SELECT refcode, refdesc, refmemo, 107
-      FROM jref013
+      FROM {db_old}.jref013
       UNION ALL
       SELECT refcode, refdesc, refmemo, 108
-      FROM jref052
+      FROM {db_old}.jref052
       UNION ALL
       SELECT refcode, refdesc, refmemo, 109
-      FROM jref054
+      FROM {db_old}.jref054
       UNION ALL
       SELECT refcode, refdesc, refmemo, 110
-      FROM jref0n2
+      FROM {db_old}.jref0n2
       UNION ALL
       SELECT refcode, refdesc, refmemo, 111
-      FROM jref001
+      FROM {db_old}.jref001
       UNION ALL
       SELECT refcode, refdesc, refmemo, 112
-      FROM jref004
+      FROM {db_old}.jref004
       UNION ALL
       SELECT refcode, refdesc, refmemo, 113
-      FROM jref091
+      FROM {db_old}.jref091
       UNION ALL
       SELECT refcode, refdesc, refmemo, 117
-      FROM jref030) AS combined_data;
+      FROM {db_old}.jref030) AS combined_data;
 
 -- Step 1: Set the initial row number
 SET
@@ -89,7 +89,7 @@ FROM temp_codesets_with_ids;
 DROP
 TEMPORARY TABLE IF EXISTS temp_codesets_with_ids;
 
-INSERT INTO pf_new.code_sets
+INSERT INTO {db_new}.code_sets
 (id, code, value, description, parent_id, properties, editable, deletable,
  created_by, updated_by, deleted_at, created_at, updated_at)
 VALUES (1, 'address-states-list', 'Address States', 'Address States', NULL, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL),
@@ -160,92 +160,92 @@ VALUES (1, 'address-states-list', 'Address States', 'Address States', NULL, NULL
 ;
 
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (100, 'sales_sources', 'Sales Sources', 'Sales Sources', 1);
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (101, 'market_segments', 'Market Segments', 'Market Segments', 1);
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (102, 'note_titles', 'Note Titles', 'Note Titles', 1);
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (103, 'asset_types', 'Asset Types', 'Asset Types', 1);
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (104, 'equipment_types', 'Equipment Types', 'Equipment Types', 1);
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (105, 'disposal_locations', 'Disposal Locations', 'Disposal locations', 1);
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (106, 'rate_codes', 'Rate Codes', 'Rate Codes', 1);
-insert into pf_new.code_sets(id, code, value, description)
+insert into {db_new}.code_sets(id, code, value, description)
 values (107, 'work_order_statuses ', 'Work Order Statuses', 'Work Order Statuses');
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (108, 'waste_sources', 'Waste Sources', 'Waste Sources', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (109, 'waste_types ', 'Waste Types ', 'Waste Types', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (110, 'trucks', 'Trucks', 'Trucks', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (111, 'service_types', 'Service Types', 'Service Types', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (112, 'sales_credits ', 'Sales Credits ', 'Sales Credits ', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (113, 'surcharges', 'Surcharges', 'Surcharges', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (114, 'email_templates', 'Email Templates', 'Email Templates', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (115, 'taxes', 'Taxes', 'Taxes', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (116, 'text_templates', 'Text Templates', 'Text Templates', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (118, 'note_categories', 'Note Categories', 'Note Categories', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (119, 'scheduling_settings', 'Scheduling Settings', 'Scheduling Settings', 1);
 
-insert into pf_new.code_sets(id, code, value, description, editable)
+insert into {db_new}.code_sets(id, code, value, description, editable)
 values (117, 'sales_reps', 'Sales Reps', 'Sales Reps', 1);
 
 --
-insert into pf_new.code_sets(id, code, value, description)
+insert into {db_new}.code_sets(id, code, value, description)
 values (10001, 'division_market_segment_id', 'division market segment id', 'division market segment id');
 
-insert into pf_new.code_sets(id, code, value, description, parent_id, properties, editable)
+insert into {db_new}.code_sets(id, code, value, description, parent_id, properties, editable)
 values (10000, '7118', '', 'Site Default Surcharge #1 Code', 113, '{"Percentage": 0}', 1);
 
-insert into pf_new.code_sets(id, code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(id, code, value, description, parent_id, editable)
 values (4999, 'advanced', 'Advanced', 'Advanced', 119, 1);
 
-insert into pf_new.code_sets(id, code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(id, code, value, description, parent_id, editable)
 values (5000, 'arrears', 'Arrears', 'Arrears', 119, 1);
 
-insert into pf_new.code_sets(id, code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(id, code, value, description, parent_id, editable)
 values (99999, '', '', 'Blank', 1, 1);
 
-insert into pf_new.code_sets(id, code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(id, code, value, description, parent_id, editable)
 values (99998, '', '', 'Blank', NULL, 1);
 
-insert into pf_new.code_sets(id, code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(id, code, value, description, parent_id, editable)
 values (99997, '', '', 'Bad Data', NULL, 1);
 
 
-insert into pf_new.code_sets(code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(code, value, description, parent_id, editable)
 values ('na', 'na', 'na', NULL, 1);
 
-INSERT INTO pf_new.code_sets (id, code, value, description, parent_id, properties)
+INSERT INTO {db_new}.code_sets (id, code, value, description, parent_id, properties)
 SELECT id, code, value, CAST(description AS CHAR(1024)), parent_id, null
 FROM temp_codesets
 where code is not null;
 
 
-insert into pf_new.code_sets(code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(code, value, description, parent_id, editable)
 values ('PTW', 'PTW', 'PTW', 103, 1),
        ('SPT', 'SPT', 'SPT', 103, 1),
        ('SPTS', 'SPTS', 'SPTS', 103, 1),
@@ -262,9 +262,9 @@ values ('PTW', 'PTW', 'PTW', 103, 1),
        ('CT', 'CT', 'CT', 103, 1),
        ('EXEC', 'EXEC', 'EXEC', 103, 1);
 
-insert into pf_new.code_sets(code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(code, value, description, parent_id, editable)
 values ('RENTM', 'RENTM', 'RENTM', 106, 1),
        ('RENTW', 'RENTW', 'RENTW', 106, 1);
 
-insert into pf_new.code_sets(code, value, description, parent_id, editable)
+insert into {db_new}.code_sets(code, value, description, parent_id, editable)
 values ('Completed', 'Completed', 'Completed', 107, 1);

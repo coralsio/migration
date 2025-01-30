@@ -1,6 +1,6 @@
-truncate table pf_new.template_work_order_equipments;
+truncate table {db_new}.template_work_order_equipments;
 
-INSERT INTO pf_new.template_work_order_equipments (id,
+INSERT INTO {db_new}.template_work_order_equipments (id,
                                                    work_order_id,
                                                    site_id,
                                                    template_work_order_id,
@@ -32,5 +32,5 @@ SELECT pe.id,
        pe.latitude,
        pe.longitude,
        pe.created_at
-FROM pf_new.equipments pe
-         INNER JOIN pf_new.template_work_orders pft ON pft.site_id = pe.site_id;
+FROM {db_new}.equipments pe
+         INNER JOIN {db_new}.template_work_orders pft ON pft.site_id = pe.site_id;

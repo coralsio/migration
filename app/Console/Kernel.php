@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use Corals\Modules\Migration\Console\Commands\RunNewDbScripts;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +14,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        \Corals\Modules\Migration\Console\Commands\SyncOldDB::class,
+        RunNewDbScripts::class,
     ];
 
     /**

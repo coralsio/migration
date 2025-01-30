@@ -1,10 +1,10 @@
--- UPDATE jcusf01_sites_dbf SET startdate =null WHERE startdate  = '';
--- UPDATE jcusf01_sites_dbf SET startdate = STR_TO_DATE(startdate,'%d/%m/%Y');
+-- UPDATE jcusf01 SET startdate =null WHERE startdate  = '';
+-- UPDATE jcusf01 SET startdate = STR_TO_DATE(startdate,'%d/%m/%Y');
 set FOREIGN_key_checks = 0;
 
-truncate table pf_new.notifications;
+truncate table {db_new}.notifications;
 
-INSERT INTO pf_new.notifications (ID,
+INSERT INTO {db_new}.notifications (ID,
                                   customer_id,
                                   site_id,
                                   user_id,
@@ -25,7 +25,7 @@ SELECT (@rownum := @rownum + 1)                                                 
        pfs.id                                                                                                                              AS site_id,
        COALESCE(
                (SELECT id
-                FROM pf_new.code_sets cs
+                FROM {db_new}.code_sets cs
                 WHERE cs.code = j.centclerk
                   AND cs.parent_id IN (100, 112)
                LIMIT
@@ -45,22 +45,22 @@ SELECT (@rownum := @rownum + 1)                                                 
            ELSE NULL
            END                                                                                                                             AS next_notification_date,
        ''                                                                                                                                  AS sms_message
-FROM jcusf01_sites_dbf j
-         JOIN pf_new.sites pfs ON j.custnum = pfs.id
+FROM {db_old}.jcusf01 j
+         JOIN {db_new}.sites pfs ON j.custnum = pfs.id
    , (SELECT @rownum := 0) r
 WHERE j.startdate > '2019-12-31';
 
 
 -- Update scheduling_start_date to '1990-01-01' where it's earlier than '1970-01-01'
-UPDATE pf_new.notifications
+UPDATE {db_new}.notifications
 SET scheduling_start_date = '1990-01-01'
 WHERE scheduling_start_date < '1970-01-01';
 
 -- Add 50 years to scheduling_end_date
-UPDATE pf_new.notifications
+UPDATE {db_new}.notifications
 SET scheduling_end_date = DATE_ADD(scheduling_end_date, INTERVAL 50 YEAR);
 
 -- Delete rows where scheduling_frequency is 0
 DELETE
-FROM pf_new.notifications
+FROM {db_new}.notifications
 WHERE scheduling_frequency = 0;

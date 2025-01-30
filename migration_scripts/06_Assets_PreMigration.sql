@@ -1,7 +1,5 @@
 DROP PROCEDURE IF EXISTS AddColumnsIfNotExists;
 
-DELIMITER //
-
 CREATE PROCEDURE AddColumnsIfNotExists()
 BEGIN
     DECLARE column_exists INT;
@@ -9,10 +7,10 @@ BEGIN
 SELECT COUNT(*) INTO column_exists FROM information_schema.COLUMNS
 WHERE TABLE_NAME = 'jivtf01'
   AND COLUMN_NAME = 'PFrent_rate_code_id'
-  AND TABLE_SCHEMA = DATABASE();
+  AND TABLE_SCHEMA = '{db_old}';
 
 IF column_exists = 0 THEN
-ALTER TABLE jivtf01
+ALTER TABLE {db_old}.jivtf01
     ADD COLUMN PFrent_rate_code_id CHAR(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             ADD COLUMN PFrent_schedule VARCHAR(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             ADD COLUMN PFrent_rate DECIMAL(9,2),
@@ -44,16 +42,13 @@ ALTER TABLE jivtf01
             ADD COLUMN PFcode10_schedule VARCHAR(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             ADD COLUMN PFcode10_rate DECIMAL(9,2);
 END IF;
-END
-//
+END;
 
-DELIMITER ;
 
 CALL AddColumnsIfNotExists();
 
 DROP PROCEDURE IF EXISTS UpdateRates;
 
-DELIMITER $$
 
 CREATE PROCEDURE UpdateRates()
 BEGIN
@@ -100,7 +95,7 @@ MonthlyOtherRate DECIMAL(9,2);
     -- Declare done variable to detect end of cursor
     DECLARE done INT DEFAULT 0;
 
-    -- Declare cursor for selecting data from jivtf01 table
+    -- Declare cursor for selecting data from {db_old}.jivtf01 table
     DECLARE
 RentalUnitRateCursor CURSOR FOR
 SELECT Serial,
@@ -119,7 +114,7 @@ SELECT Serial,
        CAST(othdrate AS DECIMAL(9, 2)),
        CAST(othwrate AS DECIMAL(9, 2)),
        CAST(othmrate AS DECIMAL(9, 2))
-FROM jivtf01;
+FROM {db_old}.jivtf01;
 
 -- Continue handler to handle end of data from cursor
 DECLARE
@@ -128,7 +123,7 @@ CONTINUE HANDLER FOR NOT FOUND SET done = 1;
     -- Fetch the charge codes from jpptf1 table
 SELECT LSRENT, LSDAMAGE, LSOTHER
 INTO RentCode, DamageCode, OtherCode
-FROM jpptf1;
+FROM {db_old}.jpptf1;
 
 -- Open cursor
 OPEN RentalUnitRateCursor;
@@ -152,7 +147,7 @@ END IF;
         -- Update Rent Rate
         IF
 DailyRate > 0 THEN
-UPDATE jivtf01
+UPDATE {db_old}.jivtf01
 SET PFrent_rate_code_id = CONCAT(RTRIM(RentCode), 'D'),
     PFrent_schedule     = 'Daily',
     PFrent_rate         = DailyRate
@@ -160,7 +155,7 @@ WHERE serial = SerialVariable;
 END IF;
         IF
 WeeklyRate > 0 THEN
-UPDATE jivtf01
+UPDATE {db_old}.jivtf01
 SET PFrent_rate_code_id = CONCAT(RTRIM(RentCode), 'W'),
     PFrent_schedule     = 'Weekly',
     PFrent_rate         = WeeklyRate
@@ -168,7 +163,7 @@ WHERE serial = SerialVariable;
 END IF;
         IF
 MonthlyRate > 0 THEN
-UPDATE jivtf01
+UPDATE {db_old}.jivtf01
 SET PFrent_rate_code_id = CONCAT(RTRIM(RentCode), 'M'),
     PFrent_schedule     = 'Monthly',
     PFrent_rate         = MonthlyRate
@@ -182,8 +177,7 @@ read_loop;
     -- Close cursor
 CLOSE RentalUnitRateCursor;
 
-END$$
+END;
 
-DELIMITER ;
 
 CALL UpdateRates();

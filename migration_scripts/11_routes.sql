@@ -1,8 +1,8 @@
 set FOREIGN_key_checks=0;
     set sql_mode ='';
-truncate table pf_new.routes;
+truncate table {db_new}.routes;
 
-INSERT INTO pf_new.routes (ID, code, description, route_number, route_day, route_color, driver_id, truck_id,
+INSERT INTO {db_new}.routes (ID, code, description, route_number, route_day, route_color, driver_id, truck_id,
                            division_id, max_stops)
 SELECT ROW_NUMBER()  OVER(ORDER BY a.ROUTECODE ASC) AS ID, a.ROUTECODE AS code,
        ROUTECODE  AS description,
@@ -19,6 +19,6 @@ SELECT ROW_NUMBER()  OVER(ORDER BY a.ROUTECODE ASC) AS ID, a.ROUTECODE AS code,
        ''         AS route_color,
        0          AS driver_id,
        110        AS truck_id,
-       (SELECT id FROM pf_new.divisions LIMIT 1) AS division_id,
+       (SELECT id FROM {db_new}.divisions LIMIT 1) AS division_id,
     0 AS max_stops
-FROM JRTF01 a group by routecode;
+FROM {db_old}.JRTF01 a group by routecode;

@@ -7,7 +7,6 @@
 -- Drop the procedure if it already exists
 DROP PROCEDURE IF EXISTS AddMissingColumns;
 
-DELIMITER $$
 
 CREATE PROCEDURE AddMissingColumns()
 BEGIN
@@ -17,10 +16,10 @@ SELECT COUNT(*) INTO column_exists
 FROM information_schema.COLUMNS
 WHERE TABLE_NAME = 'jivof01'
   AND COLUMN_NAME = 'PFTaxAmount'
-  AND TABLE_SCHEMA = DATABASE(); -- Use the current database
+  AND TABLE_SCHEMA = '{db_old}'; -- Use the current database
 
 IF column_exists = 0 THEN
-ALTER TABLE jivof01
+ALTER TABLE {db_old}.jivof01
     ADD COLUMN PFTaxAmount DECIMAL(10, 3);
 END IF;
 
@@ -32,17 +31,14 @@ SELECT COUNT(*) INTO column_exists
 FROM information_schema.COLUMNS
 WHERE TABLE_NAME = 'jivof01'
   AND COLUMN_NAME = 'PFPreTaxTotal'
-  AND TABLE_SCHEMA = DATABASE();
+  AND TABLE_SCHEMA = '{db_old}';
 
 -- If PFPreTaxTotal does not exist, add the column
 IF column_exists = 0 THEN
-ALTER TABLE jivof01
+ALTER TABLE {db_old}.jivof01
     ADD COLUMN PFPreTaxTotal DECIMAL(10, 3);
 END IF;
-END $$
-
--- Reset the delimiter back to the default
-DELIMITER ;
+END;
 
 -- Call the procedure to execute it
 CALL AddMissingColumns();
@@ -55,12 +51,12 @@ CALL AddMissingColumns();
 -- CREATE INDEX idx_invdate ON jivof01 (invdate);
 
 
-UPDATE jivof01 j
+UPDATE {db_old}.jivof01 j
     JOIN (
     SELECT chrginv AS InvoiceNumber,
     SUM(chrgamt) AS PreTaxTotal,
     SUM(chrgtax) AS TaxTotal
-    FROM jxchrgf1
+    FROM {db_old}.jxchrgf1
     WHERE chrgdate > '2015-12-01'
     GROUP BY chrginv
     ) c ON j.prev_inv = c.InvoiceNumber
